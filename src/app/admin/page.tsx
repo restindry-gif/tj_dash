@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card' 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import Link from 'next/link'
 
 // Helper for date formatting
 const formatDate = (dateString: string) => {
@@ -65,6 +66,16 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">관리자 대시보드</h1>
+        <Link
+          href="/admin/cases/new"
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+        >
+          + 신규 사건 등록
+        </Link>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard title="전체 의뢰" value={totalCases} />
         <StatsCard title="진행 중" value={activeCases} type="active" />
