@@ -2,8 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-import { headers } from 'next/headers'
-
 export async function login(formData: FormData) {
   'use server'
 
@@ -11,42 +9,29 @@ export async function login(formData: FormData) {
   const password = formData.get('password') as string
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
 
   if (error) {
-    return redirect('/login?message=Could not authenticate user')
+    return redirect(`/login?message=${encodeURIComponent(error.message)}`)
   }
+
+  // Fetch user role to redirect correctly
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .single()
 
   revalidatePath('/', 'layout')
-  redirect('/admin')
-}
 
-export async function signup(formData: FormData) {
-  'use server'
-
-  const origin = (await headers()).get('origin')
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const fullName = formData.get('fullName') as string
-  const supabase = await createClient()
-
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
-      },
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
-  })
-
-  if (error) {
-    return redirect('/login?message=Could not authenticate user')
+  if (profile?.role === 'admin') {
+    redirect('/admin')
+  } else if (profile?.role === 'staff') {
+    redirect('/staff')
+  } else {
+    redirect('/customer')
   }
-
-  return redirect('/login?message=Check email to continue sign in process')
 }

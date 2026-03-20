@@ -1,7 +1,11 @@
 
-import { login, signup } from './actions'
+import { login } from './actions'
 
-export default function LoginPage() {
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ message: string }>
+}) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -15,7 +19,10 @@ export default function LoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white px-4 py-8 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6">
+          <form className="space-y-6" action={login}>
+            {/* Error Message Display */}
+            <MessageDisplay searchParams={searchParams} />
+            
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 이메일
@@ -48,9 +55,9 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div>
               <button
-                formAction={login}
+                type="submit"
                 className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 로그인
@@ -59,6 +66,16 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
+    </div>
+  )
+}
+
+async function MessageDisplay({ searchParams }: { searchParams: Promise<{ message: string }> }) {
+  const { message } = await searchParams
+  if (!message) return null
+  return (
+    <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+      <p className="text-sm text-red-700">{message}</p>
     </div>
   )
 }
