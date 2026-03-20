@@ -1,6 +1,7 @@
 import { createDatabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { StatusChangeForm } from './status-form'
+import { ConvertToCaseButton } from './convert-button'
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ko-KR', {
@@ -128,6 +129,15 @@ export default async function ConsultationDetailPage({
         <StatusChangeForm consultationId={consultation.id} currentStatus={consultation.status} />
       </div>
 
+      {/* 사건 전환 */}
+      <div className="bg-white p-6 rounded-lg border shadow-sm">
+        <h2 className="text-lg font-semibold mb-4">사건 전환</h2>
+        <ConvertToCaseButton
+          consultationId={consultation.id}
+          isConverted={consultation.status === 'converted'}
+        />
+      </div>
+
       {/* 메타 정보 */}
       <div className="text-xs text-gray-500 space-y-1">
         <p>등록일: {formatDate(consultation.created_at)}</p>
@@ -142,12 +152,14 @@ function StatusBadge({ status }: { status: string }) {
     pending: 'bg-yellow-100 text-yellow-800',
     in_progress: 'bg-blue-100 text-blue-800',
     completed: 'bg-green-100 text-green-800',
+    converted: 'bg-purple-100 text-purple-800',
   }
 
   const labels: Record<string, string> = {
     pending: '대기 중',
     in_progress: '진행 중',
     completed: '완료됨',
+    converted: '사건 전환됨',
   }
 
   return (
