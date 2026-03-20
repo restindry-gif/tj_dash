@@ -217,20 +217,24 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
     if (result.error) return
     routeReportIdRef.current = result.reportId!
 
-    // Immediately capture first point before watchPosition fires
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const point: TrackPoint = {
-          lat: pos.coords.latitude, lng: pos.coords.longitude,
-          accuracy: pos.coords.accuracy, recordedAt: new Date().toISOString(),
-        }
-        pendingRef.current.push(point)
-        allPointsRef.current.push(point)
-        setRoutePoints(n => n + 1)
-      },
-      () => {},
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
+    // Capture 3 initial points at 1-second intervals before watchPosition stabilises
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const point: TrackPoint = {
+              lat: pos.coords.latitude, lng: pos.coords.longitude,
+              accuracy: pos.coords.accuracy, recordedAt: new Date().toISOString(),
+            }
+            pendingRef.current.push(point)
+            allPointsRef.current.push(point)
+            setRoutePoints(n => n + 1)
+          },
+          () => {},
+          { enableHighAccuracy: true, timeout: 10000 }
+        )
+      }, i * 1000)
+    }
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
@@ -322,10 +326,17 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
 
         {/* 동선 추적 상태 바 */}
         {routeActive && (
-          <div className="w-full flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-4 py-2.5">
-            <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
-            <span className="text-orange-400 text-sm font-medium">동선 추적 중</span>
-            <span className="text-slate-500 text-xs ml-auto">{routePoints}개 위치 기록됨</span>
+          <div className="w-full space-y-1.5">
+            <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-4 py-2.5">
+              <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
+              <span className="text-orange-400 text-sm font-medium">동선 추적 중</span>
+              <span className="text-slate-500 text-xs ml-auto">{routePoints}개 위치 기록됨</span>
+            </div>
+            {routePoints <= 3 && (
+              <p className="text-xs text-slate-500 text-center">
+                3개 이하의 동선 포인트는 보고 시 지도 정보가 포함되지 않습니다
+              </p>
+            )}
           </div>
         )}
 

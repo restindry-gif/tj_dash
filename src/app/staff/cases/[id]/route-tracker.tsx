@@ -138,22 +138,26 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
 
     timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000)
 
-    // Immediately capture first point before watchPosition fires
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const point: TrackPoint = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-          recordedAt: new Date().toISOString(),
-        }
-        pendingRef.current.push(point)
-        allPointsRef.current.push(point)
-        setPointCount((n) => n + 1)
-      },
-      () => {},
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
+    // Capture 3 initial points at 1-second intervals before watchPosition stabilises
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const point: TrackPoint = {
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude,
+              accuracy: pos.coords.accuracy,
+              recordedAt: new Date().toISOString(),
+            }
+            pendingRef.current.push(point)
+            allPointsRef.current.push(point)
+            setPointCount((n) => n + 1)
+          },
+          () => {},
+          { enableHighAccuracy: true, timeout: 10000 }
+        )
+      }, i * 1000)
+    }
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
@@ -255,6 +259,13 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
               </div>
             </div>
           </div>
+
+          {/* 포인트 부족 안내 */}
+          {pointCount <= 3 && (
+            <p className="text-xs text-slate-500 text-center">
+              3개 이하의 동선 포인트는 보고 시 지도 정보가 포함되지 않습니다
+            </p>
+          )}
 
           {/* 메모 입력 */}
           <div className="relative">
