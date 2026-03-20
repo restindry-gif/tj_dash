@@ -39,7 +39,7 @@ export default async function ConsultationsPage() {
       </div>
 
       {/* 통계 */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <StatsCard
           title="전체 상담"
           value={consultations?.length || 0}
@@ -48,6 +48,11 @@ export default async function ConsultationsPage() {
           title="대기 중"
           value={consultations?.filter((c) => c.status === 'pending').length || 0}
           type="pending"
+        />
+        <StatsCard
+          title="진행 중"
+          value={consultations?.filter((c) => c.status === 'in_progress').length || 0}
+          type="in_progress"
         />
         <StatsCard
           title="완료됨"
@@ -103,22 +108,8 @@ export default async function ConsultationsPage() {
                       href={`/admin/consultations/${consultation.id}`}
                       className="text-sm font-medium text-blue-600 hover:underline"
                     >
-                      상세보기
+                      상세보기 →
                     </Link>
-                    {consultation.status === 'pending' && (
-                      <>
-                        <span className="text-gray-300">|</span>
-                        <button
-                          onClick={async () => {
-                            'use server'
-                            await updateConsultationStatus(consultation.id, 'completed')
-                          }}
-                          className="text-sm font-medium text-green-600 hover:underline"
-                        >
-                          완료
-                        </button>
-                      </>
-                    )}
                   </div>
                 </div>
               </CardContent>
@@ -137,11 +128,12 @@ function StatsCard({
 }: {
   title: string
   value: number
-  type?: 'default' | 'pending' | 'completed'
+  type?: 'default' | 'pending' | 'in_progress' | 'completed'
 }) {
   const colors = {
     default: 'text-gray-900',
     pending: 'text-yellow-600',
+    in_progress: 'text-blue-600',
     completed: 'text-green-600',
   }
 
@@ -156,12 +148,14 @@ function StatsCard({
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800',
+    in_progress: 'bg-blue-100 text-blue-800',
     completed: 'bg-green-100 text-green-800',
-    converted: 'bg-blue-100 text-blue-800',
+    converted: 'bg-purple-100 text-purple-800',
   }
 
   const labels: Record<string, string> = {
     pending: '대기 중',
+    in_progress: '진행 중',
     completed: '완료됨',
     converted: '사건 전환됨',
   }
