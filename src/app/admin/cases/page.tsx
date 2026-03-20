@@ -22,7 +22,7 @@ export default async function AdminCasesPage() {
 
   const { data: cases } = await supabase
     .from('cases')
-    .select('*, profiles(full_name)')
+    .select('*')
     .order('created_at', { ascending: false })
 
   const total = cases?.length ?? 0
@@ -94,9 +94,6 @@ export default async function AdminCasesPage() {
                     {c.title || '(제목 없음)'}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
-                    {c.profiles?.full_name && (
-                      <span className="text-xs text-slate-500">{c.profiles.full_name}</span>
-                    )}
                     <span className="text-xs text-slate-600">
                       {new Date(c.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                     </span>
