@@ -18,16 +18,28 @@ export async function createConsultation(formData: FormData) {
 
   const consultationId = uuidv4()
 
+  console.log('Creating consultation with data:', {
+    id: consultationId,
+    customer_name: customerName,
+    customer_email: customerEmail,
+    customer_phone: customerPhone,
+    consultation_date: consultationDate,
+    content: content?.substring(0, 50),
+    notes: notes?.substring(0, 50),
+    assigned_staff_id: assignedStaffId,
+    status: 'pending'
+  })
+
   const { error } = await supabase
     .from('consultations')
     .insert({
       id: consultationId,
       customer_name: customerName,
-      customer_email: customerEmail,
-      customer_phone: customerPhone,
+      customer_email: customerEmail || null,
+      customer_phone: customerPhone || null,
       consultation_date: consultationDate,
       content,
-      notes,
+      notes: notes || null,
       assigned_staff_id: assignedStaffId,
       status: 'pending'
     })
@@ -36,6 +48,8 @@ export async function createConsultation(formData: FormData) {
     console.error('상담 생성 오류:', error)
     throw new Error(`상담 생성 실패: ${error.message}`)
   }
+
+  console.log('Consultation created successfully:', consultationId)
 
   revalidatePath('/admin/consultations')
   revalidatePath(`/admin/consultations/${consultationId}`)
