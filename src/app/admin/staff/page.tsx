@@ -1,5 +1,5 @@
 import { createDatabaseClient } from '@/lib/supabase/client'
-import { createStaff } from './actions'
+import { StaffForm } from './staff-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function StaffManagementPage() {
@@ -25,51 +25,7 @@ export default async function StaffManagementPage() {
             <CardTitle>신규 직원 등록</CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={createStaff} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">이름</label>
-                <input
-                  name="fullName"
-                  required
-                  placeholder="김탐정"
-                  className="w-full p-2 border rounded-md"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">이메일 (로그인 ID)</label>
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="staff@tj-detective.com"
-                  className="w-full p-2 border rounded-md"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">비밀번호</label>
-                <input
-                  name="password"
-                  type="password"
-                  required
-                  placeholder="초기 비밀번호 입력"
-                  className="w-full p-2 border rounded-md"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">전화번호</label>
-                <input
-                  name="phone"
-                  placeholder="010-0000-0000"
-                  className="w-full p-2 border rounded-md"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 font-medium"
-              >
-                직원 계정 생성
-              </button>
-            </form>
+            <StaffForm />
           </CardContent>
         </Card>
 
