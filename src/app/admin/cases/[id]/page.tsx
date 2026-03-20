@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CaseStatusForm } from './status-form'
 import { AssignStaffForm } from './assign-staff-form'
 import { FeeForm } from './fee-form'
+import { ReportsPanel } from './reports-panel'
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ko-KR', {
@@ -139,6 +140,9 @@ export default async function CaseDetailPage({
         <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-4">상태 변경</p>
         <CaseStatusForm caseId={caseData.id} currentStatus={caseData.status} />
       </div>
+
+      {/* 4. 현장 보고 내역 */}
+      <ReportsPanel caseId={caseData.id} />
 
       {/* 메타 정보 */}
       <div className="text-slate-600 text-xs space-y-1">

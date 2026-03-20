@@ -1,6 +1,20 @@
-import Link from "next/link";
+import Link from "next/link"
+import { getSession } from "@/lib/auth/session"
+import { redirect } from "next/navigation"
 
-export default function Home() {
+export default async function Home() {
+  const session = await getSession()
+
+  // If logged in, redirect based on role
+  if (session) {
+    const role = session.user.user_metadata?.role
+    if (role === 'customer') {
+      redirect('/customer')
+    } else {
+      redirect('/admin')
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-slate-50 text-slate-900 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center text-center max-w-2xl">
@@ -15,7 +29,7 @@ export default function Home() {
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <Link
-            href="/login"
+            href="/auth/login"
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-slate-900 text-white gap-2 hover:bg-slate-700 text-sm sm:text-base h-10 sm:h-12 px-8"
           >
             로그인
@@ -26,5 +40,5 @@ export default function Home() {
         &copy; 2026 TJ Detective Agency. All rights reserved.
       </footer>
     </div>
-  );
+  )
 }

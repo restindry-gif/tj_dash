@@ -39,6 +39,7 @@ export async function createCase(formData: FormData) {
   const description = formData.get('description') as string
   const consultationNotes = formData.get('consultationNotes') as string
   const feeAmount = formData.get('feeAmount') ? parseFloat(formData.get('feeAmount') as string) : null
+  const advancePayment = formData.get('advancePayment') ? parseFloat(formData.get('advancePayment') as string) : null
   const assignedStaffId = formData.get('assignedStaffId') as string || null
   const status = formData.get('status') as string || 'pending'
 
@@ -49,6 +50,7 @@ export async function createCase(formData: FormData) {
       description,
       consultation_notes: consultationNotes,
       fee_amount: feeAmount,
+      advance_payment: advancePayment,
       client_id: clientId,
       assigned_staff_id: assignedStaffId,
       status
@@ -77,4 +79,56 @@ export async function updateCaseStatus(caseId: string, status: string) {
 
   revalidatePath('/admin')
   revalidatePath(`/admin/cases/${caseId}`)
+}
+
+/**
+ * Update case assigned staff
+ */
+export async function updateCaseAssignedStaff(
+  caseId: string,
+  assignedStaffId: string | null
+) {
+  const supabase = createDatabaseClient()
+
+  const { error } = await supabase
+    .from('cases')
+    .update({ assigned_staff_id: assignedStaffId })
+    .eq('id', caseId)
+
+  if (error) {
+    console.error('직원 배정 업데이트 오류:', error)
+    throw new Error(`직원 배정 변경 실패: ${error.message}`)
+  }
+
+  revalidatePath('/admin')
+  revalidatePath(`/admin/cases/${caseId}`)
+  return { success: true }
+}
+
+/**
+ * Update case fees
+ */
+export async function updateCaseFees(
+  caseId: string,
+  feeAmount: number | null,
+  advancePayment: number | null
+) {
+  const supabase = createDatabaseClient()
+
+  const { error } = await supabase
+    .from('cases')
+    .update({
+      fee_amount: feeAmount,
+      advance_payment: advancePayment
+    })
+    .eq('id', caseId)
+
+  if (error) {
+    console.error('수임료 업데이트 오류:', error)
+    throw new Error(`수임료 변경 실패: ${error.message}`)
+  }
+
+  revalidatePath('/admin')
+  revalidatePath(`/admin/cases/${caseId}`)
+  return { success: true }
 }
