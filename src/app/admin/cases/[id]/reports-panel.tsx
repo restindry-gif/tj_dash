@@ -151,8 +151,15 @@ export async function ReportsPanel({ caseId }: { caseId: string }) {
                     </div>
                   )}
                   {/* 지도 */}
-                  {report.session_id && routePointsMap[report.session_id]?.length > 0 && (
+                  {report.session_id && routePointsMap[report.session_id]?.length > 0 ? (
                     <RouteMapDynamic points={routePointsMap[report.session_id]} />
+                  ) : (
+                    <div className="flex items-center gap-2 bg-slate-800/50 rounded-xl px-4 py-3 text-slate-500 text-xs">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+                      </svg>
+                      GPS 포인트 없음 — 세션이 너무 짧거나 GPS 신호를 받기 전에 종료되었습니다
+                    </div>
                   )}
                 </div>
               )}
