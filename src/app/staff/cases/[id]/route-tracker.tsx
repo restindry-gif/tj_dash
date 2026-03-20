@@ -138,6 +138,23 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
 
     timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000)
 
+    // Immediately capture first point before watchPosition fires
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const point: TrackPoint = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+          recordedAt: new Date().toISOString(),
+        }
+        pendingRef.current.push(point)
+        allPointsRef.current.push(point)
+        setPointCount((n) => n + 1)
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         const point: TrackPoint = {

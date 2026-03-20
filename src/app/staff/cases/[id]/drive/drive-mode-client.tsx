@@ -217,6 +217,21 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
     if (result.error) return
     routeReportIdRef.current = result.reportId!
 
+    // Immediately capture first point before watchPosition fires
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const point: TrackPoint = {
+          lat: pos.coords.latitude, lng: pos.coords.longitude,
+          accuracy: pos.coords.accuracy, recordedAt: new Date().toISOString(),
+        }
+        pendingRef.current.push(point)
+        allPointsRef.current.push(point)
+        setRoutePoints(n => n + 1)
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         const point: TrackPoint = {
