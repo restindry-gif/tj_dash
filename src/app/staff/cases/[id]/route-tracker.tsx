@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { startRouteReport, saveTrackPoints, endRouteReport } from '@/app/staff/actions'
+import type { SpeechRecognitionEvent, SpeechRecognitionInstance } from '@/lib/speech-types'
+import '@/lib/speech-types'
 
 interface TrackPoint {
   lat: number
@@ -16,7 +18,6 @@ interface RouteTrackerProps {
   onComplete?: () => void
 }
 
-/** Haversine distance (km) between two coords */
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number) {
   const R = 6371
   const dLat = ((lat2 - lat1) * Math.PI) / 180
@@ -35,20 +36,65 @@ function totalDistance(points: TrackPoint[]) {
   return km
 }
 
-const BATCH_SIZE = 10 // auto-save every 10 points
+const BATCH_SIZE = 10
 
 export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps) {
   const [status, setStatus] = useState<'idle' | 'tracking' | 'saving' | 'done'>('idle')
   const [pointCount, setPointCount] = useState(0)
   const [error, setError] = useState('')
   const [elapsed, setElapsed] = useState(0)
+  const [note, setNote] = useState('')
+  const [listening, setListening] = useState(false)
+  const [sttSupported, setSttSupported] = useState(false)
 
   const sessionIdRef = useRef<string>('')
   const reportIdRef = useRef<string>('')
   const watchIdRef = useRef<number | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const pendingRef = useRef<TrackPoint[]>([])  // unsaved buffer
-  const allPointsRef = useRef<TrackPoint[]>([]) // all points for distance calc
+  const pendingRef = useRef<TrackPoint[]>([])
+  const allPointsRef = useRef<TrackPoint[]>([])
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const elapsedRef = useRef(0)
+
+  useEffect(() => {
+    setSttSupported(!!(window.SpeechRecognition || window.webkitSpeechRecognition))
+  }, [])
+
+  // keep elapsedRef in sync for stopTracking closure
+  useEffect(() => { elapsedRef.current = elapsed }, [elapsed])
+
+  const toggleStt = () => {
+    if (listening) {
+      recognitionRef.current?.stop()
+      setListening(false)
+      return
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) return
+    const recognition: SpeechRecognitionInstance = new SR()
+    recognitionRef.current = recognition
+    recognition.lang = 'ko-KR'
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.onresult = (e: SpeechRecognitionEvent) => {
+      let finalText = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finalText += e.results[i][0].transcript
+      }
+      if (finalText) {
+        setNote((prev) => {
+          const trimmed = prev.trimEnd()
+          return trimmed ? trimmed + ' ' + finalText : finalText
+        })
+      }
+    }
+    recognition.onend = () => setListening(false)
+    recognition.onerror = () => setListening(false)
+    recognition.start()
+    setListening(true)
+    textareaRef.current?.focus()
+  }
 
   const flushPoints = useCallback(async () => {
     if (pendingRef.current.length === 0) return
@@ -79,11 +125,9 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
     allPointsRef.current = []
     pendingRef.current = []
 
-    // Generate session ID
     const sessionId = crypto.randomUUID()
     sessionIdRef.current = sessionId
 
-    // Create route report row
     const result = await startRouteReport(caseId, staffId, sessionId)
     if (result.error) {
       setError(result.error)
@@ -92,10 +136,8 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
     }
     reportIdRef.current = result.reportId!
 
-    // Elapsed timer
     timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000)
 
-    // Start GPS watch
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         const point: TrackPoint = {
@@ -107,11 +149,7 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
         pendingRef.current.push(point)
         allPointsRef.current.push(point)
         setPointCount((n) => n + 1)
-
-        // Auto-flush every BATCH_SIZE points
-        if (pendingRef.current.length >= BATCH_SIZE) {
-          flushPoints()
-        }
+        if (pendingRef.current.length >= BATCH_SIZE) flushPoints()
       },
       (err) => setError(`GPS 오류: ${err.message}`),
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
@@ -119,19 +157,20 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
   }
 
   const stopTracking = async () => {
+    recognitionRef.current?.stop()
+    setListening(false)
     setStatus('saving')
 
-    // Stop GPS and timer
     if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current)
     if (timerRef.current) clearInterval(timerRef.current)
 
-    // Flush remaining points
     await flushPoints()
 
     const points = allPointsRef.current
     const km = totalDistance(points)
-    const mins = Math.round(elapsed / 60)
-    const summary = `동선 추적 완료 — ${points.length}개 위치, ${km.toFixed(2)}km, 약 ${mins}분`
+    const mins = Math.round(elapsedRef.current / 60)
+    const baseSummary = `동선 추적 완료 — ${points.length}개 위치, ${km.toFixed(2)}km, 약 ${mins}분`
+    const summary = note.trim() ? `${baseSummary}\n${note.trim()}` : baseSummary
 
     await endRouteReport(reportIdRef.current, points.length, km, summary)
 
@@ -198,6 +237,48 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
                 <p className="text-xs text-slate-500 mt-0.5">이동거리 (km)</p>
               </div>
             </div>
+          </div>
+
+          {/* 메모 입력 */}
+          <div className="relative">
+            <textarea
+              ref={textareaRef}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={listening ? '말씀하세요...' : '동선 메모 입력 (선택)'}
+              rows={3}
+              className={`w-full bg-slate-800/80 rounded-xl px-4 py-3 pr-14 text-slate-200 text-base placeholder-slate-500 focus:outline-none focus:ring-2 resize-none leading-relaxed transition-all ${
+                listening
+                  ? 'ring-2 ring-red-500/50 border border-red-500/30'
+                  : 'border border-slate-700/50 focus:ring-orange-500/50 focus:border-orange-500/30'
+              }`}
+              style={{ fontSize: '16px' }}
+            />
+            {sttSupported && (
+              <button
+                type="button"
+                onClick={toggleStt}
+                className={`absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-lg transition-all cursor-pointer ${
+                  listening
+                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                    : 'bg-slate-700/60 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                }`}
+                aria-label={listening ? '음성 인식 중지' : '음성으로 입력'}
+              >
+                {listening ? (
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+                  </span>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" x2="12" y1="19" y2="22"/>
+                  </svg>
+                )}
+              </button>
+            )}
           </div>
 
           <button
