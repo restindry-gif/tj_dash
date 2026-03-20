@@ -66,8 +66,10 @@ export async function loginAction(formData: FormData) {
 
   // Redirect based on role
   const role = data.session.user.user_metadata?.role
-  if (role === 'admin' || role === 'staff') {
+  if (role === 'admin') {
     redirect('/admin')
+  } else if (role === 'staff') {
+    redirect('/staff')
   } else if (role === 'customer') {
     redirect('/customer')
   } else {
