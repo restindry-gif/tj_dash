@@ -157,13 +157,16 @@ export async function ReportsPanel({ caseId }: { caseId: string }) {
                 </div>
               )}
 
-              {/* 일반 텍스트 / 위치 보고 */}
+              {/* 텍스트 내용 */}
               {report.content && report.report_type !== 'route' && (
                 <p className="text-slate-300 text-sm whitespace-pre-wrap">{report.content}</p>
               )}
-              {report.content && report.report_type === 'route' && !report.total_points && (
-                <p className="text-slate-400 text-sm">{report.content}</p>
-              )}
+              {report.report_type === 'route' && report.content && (() => {
+                const memo = report.content.split('\n').slice(1).join('\n').trim()
+                return memo
+                  ? <p className="text-slate-300 text-sm whitespace-pre-wrap bg-slate-800/50 rounded-lg px-3 py-2">{memo}</p>
+                  : null
+              })()}
 
               {report.address && (
                 <p className="text-slate-400 text-xs flex items-center gap-1">
