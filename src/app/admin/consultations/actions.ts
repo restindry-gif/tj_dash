@@ -13,7 +13,8 @@ export async function createConsultation(formData: FormData) {
   const consultationDate = formData.get('consultationDate') as string
   const content = formData.get('content') as string
   const notes = formData.get('notes') as string
-  const assignedStaffId = formData.get('assignedStaffId') as string || null
+  const staffIdValue = formData.get('assignedStaffId') as string
+  const assignedStaffId = staffIdValue && staffIdValue.trim() ? staffIdValue : null
 
   const consultationId = uuidv4()
 
