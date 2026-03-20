@@ -5,6 +5,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { RouteMapDynamic } from '@/components/route-map-wrapper'
 import { RouteDownloadButton, type TrackPoint } from '@/components/route-download-button'
+import { OriginalRequestButton } from './original-request-button'
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   pending:   { label: '대기 중',     color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
@@ -262,18 +263,25 @@ export default async function CustomerCaseDetailPage({
                           alt="현장 사진"
                           className="w-full rounded-lg max-h-64 object-cover border border-slate-700/40"
                         />
-                        <a
-                          href={report.media_url}
-                          download
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 px-3 py-1.5 rounded-lg transition-colors"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
-                          </svg>
-                          사진 다운로드
-                        </a>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <a
+                            href={report.media_url}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 px-3 py-1.5 rounded-lg transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+                            </svg>
+                            사진 다운로드
+                          </a>
+                          <OriginalRequestButton
+                            reportId={report.id}
+                            caseId={caseData.id}
+                            requested={report.original_requested ?? false}
+                          />
+                        </div>
                       </div>
                     )}
 

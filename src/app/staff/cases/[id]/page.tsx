@@ -30,6 +30,7 @@ interface CaseReport {
   lng: number | null
   media_url: string | null
   is_live: boolean
+  original_requested: boolean | null
   created_at: string
 }
 
@@ -246,6 +247,11 @@ function ReportItem({ report, caseId }: { report: CaseReport; caseId: string }) 
           {report.is_live && (
             <span className="flex items-center gap-1 text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 rounded-full px-2 py-0.5 font-semibold">
               <span className="w-1 h-1 rounded-full bg-red-400 animate-pulse" />LIVE
+            </span>
+          )}
+          {report.original_requested && (
+            <span className="flex items-center gap-1 text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full px-2 py-0.5 font-semibold">
+              원본 요청됨
             </span>
           )}
         </div>
