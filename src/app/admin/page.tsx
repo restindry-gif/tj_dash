@@ -34,11 +34,41 @@ export default async function AdminPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">관리자 대시보드</h1>
+        <div className="flex gap-2">
+          <Link
+            href="/admin/consultations/new"
+            className="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700"
+          >
+            + 신규 상담
+          </Link>
+          <Link
+            href="/admin/cases/new"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+          >
+            + 신규 사건 등록
+          </Link>
+        </div>
+      </div>
+
+      {/* 네비게이션 */}
+      <div className="flex gap-2 border-b">
         <Link
-          href="/admin/cases/new"
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+          href="/admin"
+          className="px-4 py-2 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600"
         >
-          + 신규 사건 등록
+          📊 대시보드
+        </Link>
+        <Link
+          href="/admin/consultations"
+          className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900"
+        >
+          💬 상담 관리
+        </Link>
+        <Link
+          href="/admin/staff"
+          className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900"
+        >
+          👥 직원 관리
         </Link>
       </div>
 
