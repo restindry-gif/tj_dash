@@ -123,12 +123,10 @@ export default async function ConsultationDetailPage({
       )}
 
       {/* 상태 변환 */}
-      {consultation.status !== 'completed' && (
-        <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <h2 className="text-lg font-semibold mb-4">상태 변환</h2>
-          <StatusChangeForm consultationId={consultation.id} currentStatus={consultation.status} />
-        </div>
-      )}
+      <div className="bg-white p-6 rounded-lg border shadow-sm">
+        <h2 className="text-lg font-semibold mb-4">상태 변환</h2>
+        <StatusChangeForm consultationId={consultation.id} currentStatus={consultation.status} />
+      </div>
 
       {/* 메타 정보 */}
       <div className="text-xs text-gray-500 space-y-1">
