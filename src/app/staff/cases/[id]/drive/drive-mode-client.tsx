@@ -443,6 +443,33 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
           </div>
         )}
 
+        {/* 보고하기 버튼 — 첨부물이 있으면 바로 전송 */}
+        {voiceState !== 'confirming' && (gps || photo || transcript.trim()) && (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="w-full h-[52px] rounded-2xl bg-blue-600 border-2 border-blue-500 text-white text-base font-semibold cursor-pointer active:scale-[0.98] active:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {submitting ? (
+              <>
+                <svg className="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                전송 중
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/>
+                </svg>
+                보고하기
+              </>
+            )}
+          </button>
+        )}
+
         {/* 3개 기능 버튼 */}
         <div className="grid grid-cols-3 gap-3 w-full">
           {/* 사진 */}
