@@ -20,14 +20,6 @@ export default function Home() {
           >
             로그인 / 의뢰하기
           </Link>
-          <a
-            href="https://github.com/restindry-gif/tj_dash"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full border border-solid border-black/[.08] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-8 sm:min-w-44"
-          >
-            GitHub 저장소
-          </a>
         </div>
       </main>
       <footer className="mt-16 text-slate-500 text-sm">
