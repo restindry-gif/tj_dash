@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ReportForm } from './report-form'
+import { RouteTracker } from './route-tracker'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: '대기 중',
@@ -89,9 +90,22 @@ export default async function StaffCaseDetailPage({
       )}
 
       {/* 현장 보고 작성 */}
-      <div id="report-form" className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-4">현장 보고 작성</p>
-        <ReportForm caseId={id} staffId={user.id} />
+      <div id="report-form" className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">현장 보고 작성</p>
+
+        {/* 동선 추적 */}
+        <div>
+          <p className="text-xs text-slate-600 mb-2">동선 추적</p>
+          <RouteTracker caseId={id} staffId={user.id} />
+        </div>
+
+        <div className="border-t border-slate-800" />
+
+        {/* 일반 보고 */}
+        <div>
+          <p className="text-xs text-slate-600 mb-2">텍스트 / 위치 보고</p>
+          <ReportForm caseId={id} staffId={user.id} />
+        </div>
       </div>
 
       {/* 보고 내역 */}
