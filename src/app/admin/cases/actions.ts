@@ -61,3 +61,20 @@ export async function createCase(formData: FormData) {
   revalidatePath('/admin')
   redirect('/admin')
 }
+
+export async function updateCaseStatus(caseId: string, status: string) {
+  const supabase = createDatabaseClient()
+
+  const { error } = await supabase
+    .from('cases')
+    .update({ status })
+    .eq('id', caseId)
+
+  if (error) {
+    console.error('사건 상태 업데이트 오류:', error)
+    throw new Error(`상태 변경 실패: ${error.message}`)
+  }
+
+  revalidatePath('/admin')
+  revalidatePath(`/admin/cases/${caseId}`)
+}

@@ -116,9 +116,12 @@ export default async function AdminPage() {
                       </td>
                       <td className="px-6 py-4">{formatDate(item.created_at)}</td>
                       <td className="px-6 py-4">
-                        <button className="font-medium text-blue-600 hover:underline">
+                        <Link
+                          href={`/admin/cases/${item.id}`}
+                          className="font-medium text-blue-600 hover:underline"
+                        >
                           상세보기
-                        </button>
+                        </Link>
                       </td>
                     </tr>
                   ))
