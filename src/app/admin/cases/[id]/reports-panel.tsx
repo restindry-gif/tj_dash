@@ -176,8 +176,14 @@ export async function ReportsPanel({ caseId }: { caseId: string }) {
                 </p>
               )}
 
-              {report.media_url && (
+              {report.media_url && report.report_type === 'photo' && (
                 <img src={report.media_url} alt="현장 사진" className="rounded-lg max-h-64 object-cover border border-slate-700" />
+              )}
+              {report.media_url && report.report_type === 'voice' && (
+                <div className="bg-slate-800 rounded-lg p-3 space-y-2">
+                  <p className="text-xs text-slate-500">음성 파일</p>
+                  <audio controls src={report.media_url} className="w-full h-10" />
+                </div>
               )}
             </div>
           ))}
