@@ -8,7 +8,8 @@ export default async function NewConsultationPage() {
   const { data: staffMembers } = await supabase
     .from('profiles')
     .select('id, full_name, email')
-    .eq('role', 'staff')
+    .in('role', ['staff', 'admin'])
+    .order('full_name', { ascending: true })
 
   return (
     <div className="max-w-3xl mx-auto py-8">
