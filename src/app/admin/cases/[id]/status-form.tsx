@@ -47,7 +47,7 @@ export function CaseStatusForm({
               disabled={isLoading}
               className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-opacity ${option.color} hover:opacity-90 disabled:opacity-50`}
             >
-              {isLoading ? '변경 중...' : option.label}로 변경
+              {isLoading ? '변경 중...' : `${option.label}으로 변경`}
             </button>
           ))}
       </div>
