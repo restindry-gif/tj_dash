@@ -1,4 +1,4 @@
--- Create custom types
+/* Create custom types */
 create type user_role as enum ('admin', 'staff', 'customer');
 create type case_status as enum ('pending', 'active', 'completed', 'cancelled');
 
