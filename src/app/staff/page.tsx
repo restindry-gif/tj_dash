@@ -45,11 +45,11 @@ export default async function StaffDashboard() {
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
           <p className="text-2xl font-bold text-blue-400">{activeCases.length}</p>
-          <p className="text-xs text-slate-500 mt-1">진행 중</p>
+          <p className="text-xs text-slate-500 mt-1">진행</p>
         </div>
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
           <p className="text-2xl font-bold text-yellow-400">{pendingCases.length}</p>
-          <p className="text-xs text-slate-500 mt-1">대기 중</p>
+          <p className="text-xs text-slate-500 mt-1">대기</p>
         </div>
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
           <p className="text-2xl font-bold text-green-400">{completedCases.length}</p>

@@ -162,10 +162,10 @@ function StatusBadge({ status }: { status: string }) {
   }
 
   const labels: Record<string, string> = {
-    pending: '대기 중',
-    active: '진행 중',
-    completed: '완료됨',
-    cancelled: '취소됨',
+    pending: '대기',
+    active: '진행',
+    completed: '완료',
+    cancelled: '취소',
   }
 
   return (

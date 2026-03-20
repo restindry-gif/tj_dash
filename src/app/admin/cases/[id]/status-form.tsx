@@ -25,10 +25,10 @@ export function CaseStatusForm({
   }
 
   const statusOptions = [
-    { value: 'pending', label: '대기 중', color: 'bg-yellow-500' },
-    { value: 'active', label: '진행 중', color: 'bg-blue-500' },
-    { value: 'completed', label: '완료됨', color: 'bg-green-500' },
-    { value: 'cancelled', label: '취소됨', color: 'bg-red-500' },
+    { value: 'pending', label: '대기', color: 'bg-yellow-500' },
+    { value: 'active', label: '진행', color: 'bg-blue-500' },
+    { value: 'completed', label: '완료', color: 'bg-green-500' },
+    { value: 'cancelled', label: '취소', color: 'bg-red-500' },
   ]
 
   return (
@@ -53,7 +53,7 @@ export function CaseStatusForm({
       </div>
 
       <p className="text-xs text-slate-500">
-        대기 중 → 진행 중 → 완료됨 순서로 진행합니다
+        대기 → 진행 → 완료 순서로 진행합니다
       </p>
     </div>
   )

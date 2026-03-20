@@ -79,7 +79,7 @@ export default async function AdminPage() {
           }
         />
         <StatsCard
-          title="진행 중"
+          title="진행"
           value={activeCases}
           type="active"
           icon={
@@ -89,7 +89,7 @@ export default async function AdminPage() {
           }
         />
         <StatsCard
-          title="대기 중"
+          title="대기"
           value={pendingCases}
           type="pending"
           icon={
@@ -99,7 +99,7 @@ export default async function AdminPage() {
           }
         />
         <StatsCard
-          title="완료됨"
+          title="완료"
           value={completedCases}
           type="completed"
           icon={
@@ -218,8 +218,8 @@ function StatusBadge({ status }: { status: string }) {
   }
 
   const labels: Record<string, string> = {
-    pending: '대기 중',
-    active: '진행 중',
+    pending: '대기',
+    active: '진행',
     completed: '완료',
     cancelled: '취소',
   }

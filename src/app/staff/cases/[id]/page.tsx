@@ -9,10 +9,10 @@ import { CopyLinkButton } from '@/components/copy-link-button'
 import { CaseStatusForm } from '@/app/admin/cases/[id]/status-form'
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: '대기 중',
-  active: '진행 중',
-  completed: '완료됨',
-  cancelled: '취소됨',
+  pending: '대기',
+  active: '진행',
+  completed: '완료',
+  cancelled: '취소',
 }
 
 const STATUS_STYLES: Record<string, string> = {

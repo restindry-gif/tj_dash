@@ -4,10 +4,10 @@ import Link from 'next/link'
 export const revalidate = 30
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: '대기 중',
-  active: '진행 중',
-  completed: '완료됨',
-  cancelled: '취소됨',
+  pending: '대기',
+  active: '진행',
+  completed: '완료',
+  cancelled: '취소',
 }
 
 const STATUS_STYLES: Record<string, string> = {
@@ -53,9 +53,9 @@ export default async function AdminCasesPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: '전체', value: total, style: 'text-slate-200' },
-          { label: '진행 중', value: active, style: 'text-blue-400' },
-          { label: '대기 중', value: pending, style: 'text-yellow-400' },
-          { label: '완료됨', value: completed, style: 'text-green-400' },
+          { label: '진행', value: active, style: 'text-blue-400' },
+          { label: '대기', value: pending, style: 'text-yellow-400' },
+          { label: '완료', value: completed, style: 'text-green-400' },
         ].map(({ label, value, style }) => (
           <div key={label} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
             <p className={`text-2xl font-bold tabular-nums ${style}`}>{value}</p>
