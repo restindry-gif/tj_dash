@@ -15,10 +15,12 @@ export async function createConsultation(formData: FormData) {
   const notes = formData.get('notes') as string
   const assignedStaffId = formData.get('assignedStaffId') as string || null
 
+  const consultationId = uuidv4()
+
   const { error } = await supabase
     .from('consultations')
     .insert({
-      id: uuidv4(),
+      id: consultationId,
       customer_name: customerName,
       customer_email: customerEmail,
       customer_phone: customerPhone,
@@ -31,9 +33,13 @@ export async function createConsultation(formData: FormData) {
 
   if (error) {
     console.error('상담 생성 오류:', error)
+    throw new Error(`상담 생성 실패: ${error.message}`)
   }
 
   revalidatePath('/admin/consultations')
+  revalidatePath(`/admin/consultations/${consultationId}`)
+
+  return consultationId
 }
 
 export async function updateConsultationStatus(consultationId: string, status: string) {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createConsultation } from '../actions'
 
 type Staff = {
@@ -11,16 +12,30 @@ type Staff = {
 
 export function ConsultationForm({ staffMembers }: { staffMembers: Staff[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string>('')
+  const router = useRouter()
 
   return (
     <form
       action={async (formData) => {
         setIsSubmitting(true)
-        await createConsultation(formData)
-        setIsSubmitting(false)
+        setError('')
+        try {
+          const consultationId = await createConsultation(formData)
+          router.push(`/admin/consultations/${consultationId}`)
+        } catch (err) {
+          setError(err instanceof Error ? err.message : '상담 등록 중 오류가 발생했습니다.')
+          setIsSubmitting(false)
+        }
       }}
       className="space-y-6 max-w-2xl"
     >
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
+          {error}
+        </div>
+      )}
+
       {/* 의뢰인 정보 */}
       <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
         <h3 className="font-semibold text-lg">의뢰인 정보</h3>
