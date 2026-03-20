@@ -18,7 +18,7 @@ export default function Home() {
             href="/login"
             className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-slate-900 text-white gap-2 hover:bg-slate-700 text-sm sm:text-base h-10 sm:h-12 px-8"
           >
-            로그인 / 의뢰하기
+            로그인
           </Link>
         </div>
       </main>
