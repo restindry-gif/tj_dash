@@ -1,7 +1,8 @@
 import { createDatabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { updateConsultationStatus } from './actions'
+
+export const revalidate = 30
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ko-KR', {
@@ -23,16 +24,16 @@ export default async function ConsultationsPage() {
 
   if (error) {
     console.error('상담 목록 조회 오류:', error)
-    return <div className="p-8 text-red-600">상담 목록을 불러올 수 없습니다.</div>
+    return <div className="p-8 text-red-400">상담 목록을 불러올 수 없습니다.</div>
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">상담 관리</h1>
+        <h1 className="text-2xl font-bold text-slate-50">상담 관리</h1>
         <Link
           href="/admin/consultations/new"
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+          className="bg-green-500 text-slate-950 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-400 transition-colors"
         >
           + 신규 상담
         </Link>
@@ -62,58 +63,51 @@ export default async function ConsultationsPage() {
       </div>
 
       {/* 상담 목록 */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {consultations?.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center text-gray-500">
-              등록된 상담이 없습니다.
-            </CardContent>
-          </Card>
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center text-slate-400">
+            등록된 상담이 없습니다.
+          </div>
         ) : (
           consultations?.map((consultation) => (
-            <Card key={consultation.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg">
-                      {consultation.customer_name}
-                    </CardTitle>
-                    <div className="text-sm text-gray-500 mt-1">
-                      {consultation.customer_email && (
-                        <span>{consultation.customer_email}</span>
-                      )}
-                      {consultation.customer_phone && (
-                        <span> · {consultation.customer_phone}</span>
-                      )}
-                    </div>
-                  </div>
-                  <StatusBadge status={consultation.status} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="text-sm text-gray-600">
-                    <strong>상담 일시:</strong> {formatDate(consultation.consultation_date)}
-                  </div>
-                  <div className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded">
-                    {consultation.content}
-                  </div>
-                  {consultation.notes && (
-                    <div className="text-sm text-gray-600 border-t pt-3">
-                      <strong>메모:</strong> {consultation.notes}
-                    </div>
-                  )}
-                  <div className="flex gap-2 pt-3 border-t">
-                    <Link
-                      href={`/admin/consultations/${consultation.id}`}
-                      className="text-sm font-medium text-blue-600 hover:underline"
-                    >
-                      상세보기 →
-                    </Link>
+            <div
+              key={consultation.id}
+              className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <p className="text-lg font-semibold text-slate-50">
+                    {consultation.customer_name}
+                  </p>
+                  <div className="text-sm text-slate-400 mt-0.5">
+                    {consultation.customer_email && (
+                      <span>{consultation.customer_email}</span>
+                    )}
+                    {consultation.customer_phone && (
+                      <span> · {consultation.customer_phone}</span>
+                    )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                <StatusBadge status={consultation.status} />
+              </div>
+
+              <div className="text-sm text-slate-400 mb-2">
+                상담 일시: {formatDate(consultation.consultation_date)}
+              </div>
+
+              <div className="text-sm text-slate-300 bg-slate-800 rounded-lg px-3 py-2 line-clamp-2 whitespace-pre-wrap mb-3">
+                {consultation.content}
+              </div>
+
+              <div className="pt-2 border-t border-slate-800">
+                <Link
+                  href={`/admin/consultations/${consultation.id}`}
+                  className="text-sm font-medium text-green-400 hover:text-green-300 transition-colors"
+                >
+                  상세보기 →
+                </Link>
+              </div>
+            </div>
           ))
         )}
       </div>
@@ -131,15 +125,15 @@ function StatsCard({
   type?: 'default' | 'pending' | 'in_progress' | 'completed'
 }) {
   const colors = {
-    default: 'text-gray-900',
-    pending: 'text-yellow-600',
-    in_progress: 'text-blue-600',
-    completed: 'text-green-600',
+    default: 'text-slate-50',
+    pending: 'text-yellow-400',
+    in_progress: 'text-blue-400',
+    completed: 'text-green-400',
   }
 
   return (
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
-      <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+      <h3 className="text-sm font-medium text-slate-400">{title}</h3>
       <div className={`mt-2 text-3xl font-bold ${colors[type]}`}>{value}</div>
     </div>
   )
@@ -147,10 +141,10 @@ function StatsCard({
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    in_progress: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
-    converted: 'bg-purple-100 text-purple-800',
+    pending: 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20',
+    in_progress: 'bg-blue-400/10 text-blue-400 border border-blue-400/20',
+    completed: 'bg-green-400/10 text-green-400 border border-green-400/20',
+    converted: 'bg-purple-400/10 text-purple-400 border border-purple-400/20',
   }
 
   const labels: Record<string, string> = {
@@ -163,7 +157,7 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span
       className={`rounded-full px-3 py-1 text-xs font-medium ${
-        styles[status] || 'bg-gray-100 text-gray-800'
+        styles[status] || 'bg-slate-700 text-slate-300 border border-slate-600'
       }`}
     >
       {labels[status] || status}
