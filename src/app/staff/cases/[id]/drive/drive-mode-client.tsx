@@ -3,9 +3,10 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createDatabaseClient } from '@/lib/supabase/client'
-import { submitReport, startRouteReport, saveTrackPoints, endRouteReport } from '@/app/staff/actions'
+import { submitReport } from '@/app/staff/actions'
 import type { SpeechRecognitionEvent, SpeechRecognitionInstance } from '@/lib/speech-types'
 import '@/lib/speech-types'
+import { useRouteTracking } from '@/providers/route-tracking-provider'
 
 // ─── Image compression ───────────────────────────────────────
 const MAX_BYTES = 500 * 1024
@@ -43,27 +44,13 @@ async function compressImage(file: File): Promise<Blob> {
   })
 }
 
-// ─── Route tracking helpers ───────────────────────────────────
-interface TrackPoint { lat: number; lng: number; accuracy?: number; recordedAt: string }
-
-function haversine(lat1: number, lng1: number, lat2: number, lng2: number) {
-  const R = 6371
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLng = ((lng2 - lng1) * Math.PI) / 180
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-}
-
-function calcDistance(pts: TrackPoint[]) {
-  let km = 0
-  for (let i = 1; i < pts.length; i++) km += haversine(pts[i-1].lat, pts[i-1].lng, pts[i].lat, pts[i].lng)
-  return km
-}
-
 // ─── Component ────────────────────────────────────────────────
 interface Props { caseId: string; staffId: string; caseTitle: string }
 
 export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
+  const { status: routeStatus, session: routeSession, pointCount: routePoints, totalKm: routeKm, startTracking, requestStop, submitTracking, cancelTracking } = useRouteTracking()
+  const isThisCase = routeSession?.caseId === caseId
+
   const [now, setNow] = useState('')
   const [sttSupported, setSttSupported] = useState(false)
 
@@ -71,12 +58,6 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
   const [voiceState, setVoiceState] = useState<'idle' | 'listening' | 'confirming'>('idle')
   const [transcript, setTranscript] = useState('')
   const [interim, setInterim] = useState('')
-
-  // Route
-  const [routeActive, setRouteActive] = useState(false)
-  const [routeConfirming, setRouteConfirming] = useState(false)
-  const [routePoints, setRoutePoints] = useState(0)
-  const [routeSaving, setRouteSaving] = useState(false)
 
   // GPS attachment
   const [gps, setGps] = useState<{ lat: number; lng: number; address: string } | null>(null)
@@ -94,14 +75,6 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
   const finalRef = useRef('')
   const photoInputRef = useRef<HTMLInputElement>(null)
-
-  // Route refs
-  const routeSessionRef = useRef('')
-  const routeReportIdRef = useRef('')
-  const watchIdRef = useRef<number | null>(null)
-  const pendingRef = useRef<TrackPoint[]>([])
-  const allPointsRef = useRef<TrackPoint[]>([])
-  const routeStartRef = useRef(0)
 
   useEffect(() => {
     setSttSupported(!!(window.SpeechRecognition || window.webkitSpeechRecognition))
@@ -194,93 +167,6 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
     setPhotoCompressing(false)
   }
 
-  // ── Route tracking ─────────────────────────────────
-  const flushPoints = useCallback(async () => {
-    if (pendingRef.current.length === 0) return
-    const batch = [...pendingRef.current]
-    pendingRef.current = []
-    await saveTrackPoints(batch.map(p => ({
-      caseId, staffId, sessionId: routeSessionRef.current,
-      lat: p.lat, lng: p.lng, accuracy: p.accuracy, recordedAt: p.recordedAt,
-    })))
-  }, [caseId, staffId])
-
-  const startRoute = async () => {
-    if (!navigator.geolocation) return
-    const sessionId = crypto.randomUUID()
-    routeSessionRef.current = sessionId
-    routeStartRef.current = Date.now()
-    allPointsRef.current = []
-    pendingRef.current = []
-    setRoutePoints(0)
-
-    const result = await startRouteReport(caseId, staffId, sessionId)
-    if (result.error) return
-    routeReportIdRef.current = result.reportId!
-
-    // Capture 3 initial points at 1-second intervals before watchPosition stabilises
-    for (let i = 0; i < 3; i++) {
-      setTimeout(() => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const point: TrackPoint = {
-              lat: pos.coords.latitude, lng: pos.coords.longitude,
-              accuracy: pos.coords.accuracy, recordedAt: new Date().toISOString(),
-            }
-            pendingRef.current.push(point)
-            allPointsRef.current.push(point)
-            setRoutePoints(n => n + 1)
-          },
-          () => {},
-          { enableHighAccuracy: true, timeout: 10000 }
-        )
-      }, i * 1000)
-    }
-
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      (pos) => {
-        const point: TrackPoint = {
-          lat: pos.coords.latitude, lng: pos.coords.longitude,
-          accuracy: pos.coords.accuracy, recordedAt: new Date().toISOString(),
-        }
-        pendingRef.current.push(point)
-        allPointsRef.current.push(point)
-        setRoutePoints(n => n + 1)
-        if (pendingRef.current.length >= 10) flushPoints()
-      },
-      () => {},
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
-    )
-    setRouteActive(true)
-  }
-
-  const stopRoute = () => {
-    if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current)
-    setRouteActive(false)
-    setRouteConfirming(true)
-  }
-
-  const cancelRoute = () => {
-    setRouteConfirming(false)
-    setRoutePoints(0)
-    allPointsRef.current = []
-    pendingRef.current = []
-  }
-
-  const confirmRoute = async () => {
-    setRouteSaving(true)
-    setRouteConfirming(false)
-    await flushPoints()
-    const pts = allPointsRef.current
-    const km = calcDistance(pts)
-    const mins = Math.round((Date.now() - routeStartRef.current) / 60000)
-    const summary = `동선 추적 완료 — ${pts.length}개 위치, ${km.toFixed(2)}km, 약 ${mins}분`
-    await endRouteReport(routeReportIdRef.current, pts.length, km, summary)
-    setRoutePoints(0)
-    setRouteSaving(false)
-    showToast('동선 저장 완료')
-  }
-
   // ── Submit ─────────────────────────────────────────
   const handleSubmit = async () => {
     if (!transcript.trim() && !photo && !gps) return
@@ -338,9 +224,9 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
       <div className="flex-1 flex flex-col items-center justify-center px-5 gap-4 overflow-hidden" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}>
 
         {/* 동선 추적 상태 바 */}
-        {(routeActive || routeConfirming) && (
+        {isThisCase && (routeStatus === 'tracking' || routeStatus === 'confirming') && (
           <div className="w-full space-y-2">
-            {routeActive && (
+            {routeStatus === 'tracking' && (
               <>
                 <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-4 py-2.5">
                   <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
@@ -348,13 +234,11 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
                   <span className="text-slate-500 text-xs ml-auto">{routePoints}개 위치 기록됨</span>
                 </div>
                 {routePoints <= 3 && (
-                  <p className="text-xs text-slate-500 text-center">
-                    3개 이하의 동선 포인트는 보고 시 지도 정보가 포함되지 않습니다
-                  </p>
+                  <p className="text-xs text-slate-500 text-center">3개 이하의 동선 포인트는 보고 시 지도 정보가 포함되지 않습니다</p>
                 )}
               </>
             )}
-            {routeConfirming && (
+            {routeStatus === 'confirming' && (
               <div className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="text-center">
@@ -362,26 +246,13 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
                     <p className="text-xs text-slate-500 mt-0.5">기록된 위치</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-lg font-bold text-slate-50">{calcDistance(allPointsRef.current).toFixed(2)}</p>
+                    <p className="text-lg font-bold text-slate-50">{routeKm.toFixed(2)}</p>
                     <p className="text-xs text-slate-500 mt-0.5">이동거리 (km)</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={cancelRoute}
-                    className="h-11 rounded-xl bg-slate-700 text-slate-300 text-sm font-semibold cursor-pointer active:scale-[0.97] transition-all"
-                  >
-                    취소
-                  </button>
-                  <button
-                    type="button"
-                    onClick={confirmRoute}
-                    disabled={routeSaving}
-                    className="h-11 rounded-xl bg-orange-600 text-white text-sm font-semibold cursor-pointer active:scale-[0.97] transition-all disabled:opacity-50"
-                  >
-                    {routeSaving ? '저장 중...' : '보고하기'}
-                  </button>
+                  <button type="button" onClick={cancelTracking} className="h-11 rounded-xl bg-slate-700 text-slate-300 text-sm font-semibold cursor-pointer active:scale-[0.97] transition-all">취소</button>
+                  <button type="button" onClick={async () => { await submitTracking(); showToast('동선 저장 완료') }} className="h-11 rounded-xl bg-orange-600 text-white text-sm font-semibold cursor-pointer active:scale-[0.97] transition-all">보고하기</button>
                 </div>
               </div>
             )}
@@ -583,20 +454,18 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
           {/* 동선 추적 */}
           <button
             type="button"
-            onClick={routeActive ? stopRoute : startRoute}
-            disabled={routeSaving || routeConfirming}
+            onClick={() => {
+              if (routeStatus === 'tracking' && isThisCase) requestStop()
+              else if (routeStatus === 'idle') startTracking(caseId, staffId, caseTitle)
+            }}
+            disabled={routeStatus === 'confirming' || (routeStatus === 'tracking' && !isThisCase)}
             className={`flex flex-col items-center justify-center gap-1.5 h-[68px] rounded-2xl text-xs font-medium transition-all cursor-pointer active:scale-[0.96] disabled:opacity-50 ${
-              routeActive
+              routeStatus === 'tracking' && isThisCase
                 ? 'bg-orange-500/20 border border-orange-500/40 text-orange-300'
                 : 'bg-slate-800/80 border border-slate-700/50 text-slate-400 active:bg-slate-700'
             }`}
           >
-            {routeSaving ? (
-              <svg className="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-              </svg>
-            ) : routeActive ? (
+            {routeStatus === 'tracking' && isThisCase ? (
               <span className="w-5 h-5 flex items-center justify-center">
                 <span className="w-4 h-4 rounded-sm bg-orange-400" />
               </span>
@@ -606,7 +475,7 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
                 <circle cx="18" cy="5" r="3"/>
               </svg>
             )}
-            <span>{routeSaving ? '저장 중' : routeActive ? '추적 중지' : '동선추적'}</span>
+            <span>{routeStatus === 'tracking' && isThisCase ? '추적 중지' : '동선추적'}</span>
           </button>
         </div>
 

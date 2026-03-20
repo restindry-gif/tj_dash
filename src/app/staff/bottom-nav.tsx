@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { logoutAction } from '@/app/auth/actions'
+import { useRouteTracking } from '@/providers/route-tracking-provider'
 
 interface StaffBottomNavProps {
   userEmail?: string | null
@@ -10,12 +11,29 @@ interface StaffBottomNavProps {
 
 export function StaffBottomNav({ userEmail }: StaffBottomNavProps) {
   const pathname = usePathname()
+  const { status, session } = useRouteTracking()
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href)
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 z-40 safe-area-pb">
+      {/* 동선 추적 중 배너 */}
+      {(status === 'tracking' || status === 'confirming') && session && (
+        <Link
+          href={`/staff/cases/${session.caseId}`}
+          className="flex items-center gap-2 px-4 py-2 bg-orange-500/10 border-b border-orange-500/20 cursor-pointer"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse shrink-0" />
+          <span className="text-orange-400 text-xs font-medium flex-1 truncate">
+            {status === 'confirming' ? '업무 종료 확인 필요' : '업무 중 — 동선 추적 중'}
+          </span>
+          <span className="text-slate-500 text-xs truncate max-w-[120px]">{session.caseTitle}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 shrink-0">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </Link>
+      )}
       <div className="flex items-stretch">
         {/* 대시보드 */}
         <Link

@@ -82,6 +82,13 @@ export async function saveTrackPoints(
   return { success: true }
 }
 
+/** 동선 추적 취소: 보고 행 삭제 */
+export async function cancelRouteReport(reportId: string) {
+  const supabase = createDatabaseClient()
+  await supabase.from('case_reports').delete().eq('id', reportId)
+  return { success: true }
+}
+
 /** 동선 추적 종료: 보고 요약 업데이트 */
 export async function endRouteReport(
   reportId: string,

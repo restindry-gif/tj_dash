@@ -2,11 +2,13 @@ import Link from 'next/link'
 import { getCurrentUser } from '@/lib/auth/session'
 import { StaffBottomNav } from './bottom-nav'
 import { LogoutButton } from '@/app/admin/logout-button'
+import { RouteTrackingProvider } from '@/providers/route-tracking-provider'
 
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser()
 
   return (
+    <RouteTrackingProvider>
     <div className="flex min-h-screen bg-slate-950">
       {/* Desktop sidebar (lg+) */}
       <aside className="hidden lg:flex fixed top-0 left-0 h-screen w-64 bg-slate-900 border-r border-slate-800 flex-col z-50">
@@ -74,5 +76,6 @@ export default async function StaffLayout({ children }: { children: React.ReactN
       {/* Mobile bottom navigation */}
       <StaffBottomNav userEmail={user?.email} />
     </div>
+    </RouteTrackingProvider>
   )
 }
