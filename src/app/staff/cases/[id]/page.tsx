@@ -76,12 +76,35 @@ export default async function StaffCaseDetailPage({
           </svg>
         </Link>
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-bold text-slate-50 truncate">{caseData.title || '(제목 없음)'}</h1>
+          <h1 className="text-lg font-bold text-slate-50 truncate font-manrope">{caseData.title || '(제목 없음)'}</h1>
         </div>
         <span className={`text-xs rounded-full px-3 py-1.5 font-medium shrink-0 ${STATUS_STYLES[caseData.status] || 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
           {STATUS_LABELS[caseData.status] || caseData.status}
         </span>
       </div>
+
+      {/* 드라이브 모드 진입 버튼 */}
+      <Link
+        href={`/staff/cases/${id}/drive`}
+        className="flex items-center justify-between w-full px-4 py-3 rounded-2xl transition-all cursor-pointer active:scale-[0.98] group"
+        style={{ background: 'linear-gradient(135deg, rgba(233,193,118,0.12) 0%, rgba(233,193,118,0.06) 100%)', border: '1px solid rgba(233,193,118,0.2)' }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(233,193,118,0.15)' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e9c176" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+              <path d="M2 12h20"/>
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold font-manrope" style={{ color: '#e9c176' }}>드라이브 모드</p>
+            <p className="text-xs text-slate-500">운전 중 음성 보고 — 전체화면</p>
+          </div>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e9c176" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60 group-hover:opacity-100 transition-opacity">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+      </Link>
 
       {/* 사건 개요 */}
       {caseData.description && (
