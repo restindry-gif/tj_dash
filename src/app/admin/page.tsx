@@ -1,6 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { createDatabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
 // Helper for date formatting
@@ -13,33 +11,7 @@ const formatDate = (dateString: string) => {
 }
 
 export default async function AdminPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  // Check role
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.role !== 'admin') {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <div className="rounded-lg bg-white p-8 shadow-md">
-          <h1 className="mb-4 text-2xl font-bold text-red-600">접근 거부</h1>
-          <p className="text-gray-700">관리자 권한이 없습니다.</p>
-        </div>
-      </div>
-    )
-  }
+  const supabase = createDatabaseClient()
 
   // Fetch cases
   const { data: cases, error } = await supabase

@@ -1,5 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { createDatabaseClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 // Helper for date formatting
@@ -12,40 +11,24 @@ const formatDate = (dateString: string) => {
 }
 
 export default async function CustomerPage() {
-  const supabase = await createClient()
+  // For now, this page shows all cases
+  // In the future with authentication, this would show only the logged-in customer's cases
+  const supabase = createDatabaseClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  // Check role to ensure they are at least a customer (or anyone really, but let's be safe)
-  // Actually, RLS protects data, so we just query cases where client_id = user.id
-  // But let's verify profile exists
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) {
-    return <div>Profile not found. Please contact support.</div>
-  }
-
-  // Fetch MY cases
+  // Fetch all cases
   const { data: cases, error } = await supabase
     .from('cases')
     .select(`
       *,
+      client:profiles!client_id (
+        full_name,
+        email
+      ),
       assigned_staff:profiles!assigned_staff_id (
         full_name,
         email
       )
     `)
-    .eq('client_id', user.id)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -54,12 +37,12 @@ export default async function CustomerPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6">내 사건 의뢰 내역</h1>
-      
+    <div className="container mx-auto p-6 max-w-6xl">
+      <h1 className="text-2xl font-bold mb-6">전체 의뢰 현황</h1>
+
       {cases?.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border shadow-sm">
-          <p className="text-gray-500">진행 중인 의뢰가 없습니다.</p>
+          <p className="text-gray-500">등록된 의뢰가 없습니다.</p>
         </div>
       ) : (
         <div className="grid gap-6">
@@ -78,13 +61,28 @@ export default async function CustomerPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">의뢰인</h4>
+                      <p className="text-sm text-gray-900">{item.client?.full_name}</p>
+                    </div>
+                    {item.fee_amount && (
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-500">착수금</h4>
+                        <p className="text-sm text-gray-900">
+                          {item.fee_amount.toLocaleString('ko-KR')}원
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">상세 내용</h4>
                     <p className="text-sm text-gray-600 whitespace-pre-wrap">
                       {item.description || '내용 없음'}
                     </p>
                   </div>
-                  
+
                   {item.assigned_staff && (
                     <div className="pt-4 border-t">
                       <h4 className="text-sm font-medium text-gray-900 mb-1">담당 탐정</h4>

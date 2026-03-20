@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+import { createDatabaseClient } from '@/lib/supabase/client'
 import { CreateCaseForm } from './create-form'
 
 export default async function NewCasePage() {
-  const supabase = await createClient()
+  const supabase = createDatabaseClient()
 
   // Fetch staff for assignment dropdown
   const { data: staffMembers } = await supabase

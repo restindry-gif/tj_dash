@@ -3,7 +3,9 @@
     "allow": [
       "Read(//mnt/c/**)",
       "Bash(npm run:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(cd:*)"
     ]
   }
 }

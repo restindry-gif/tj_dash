@@ -1,69 +1,27 @@
-import { createClient } from '@supabase/supabase-js'
-import { createClient as createServerClient } from '@/lib/supabase/server'
+'use server'
+
+import { createDatabaseClient } from '@/lib/supabase/client'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function createStaff(formData: FormData) {
-  'use server'
-
-  const supabase = await createServerClient()
-  
-  // Verify admin role
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return redirect('/login')
-
-  const { data: adminProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (adminProfile?.role !== 'admin') {
-    throw new Error('Unauthorized')
-  }
+  const supabase = createDatabaseClient()
 
   const email = formData.get('email') as string
-  const password = formData.get('password') as string
   const fullName = formData.get('fullName') as string
   const phone = formData.get('phone') as string
 
-  // Use service role client to create user
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    }
-  )
+  // Create a staff profile with a UUID (since no auth in this version)
+  const staffId = uuidv4()
 
-  // 1. Create Auth User
-  const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true, // Auto confirm email
-    user_metadata: { full_name: fullName }
-  })
-
-  if (createError) {
-    console.error('Error creating staff user:', createError)
-    // In a real app, you'd want to return this error to the UI
-    return
-  }
-
-  if (!newUser.user) return
-
-  // 2. Create Profile with Staff Role
-  const { error: profileError } = await supabaseAdmin
+  const { error: profileError } = await supabase
     .from('profiles')
-    .upsert({
-      id: newUser.user.id,
+    .insert({
+      id: staffId,
       email,
       full_name: fullName,
       phone,
-      role: 'staff' // Important: Set role to staff
+      role: 'staff'
     })
 
   if (profileError) {
