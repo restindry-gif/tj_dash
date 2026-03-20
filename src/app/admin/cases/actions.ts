@@ -1,7 +1,7 @@
 'use server'
 
 import { createDatabaseClient } from '@/lib/supabase/client'
-import { createAuthUser } from '@/lib/auth/server'
+import { createAuthUser, getAuthUserByEmail } from '@/lib/auth/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -19,8 +19,21 @@ export async function createCase(formData: FormData) {
     const password = (formData.get('clientPassword') as string) || 'temp1234'
 
     // Create auth user first, use auth user's ID as profile ID
-    const authUser = await createAuthUser(email, password, 'customer')
-    clientId = authUser.id
+    let authUserId: string
+    try {
+      const authUser = await createAuthUser(email, password, 'customer')
+      authUserId = authUser.id
+    } catch {
+      // Email already registered — find existing auth user
+      const existing = await getAuthUserByEmail(email)
+      if (existing) {
+        authUserId = existing.id
+      } else {
+        // Fallback: create profile without auth (password reset in customer mgmt)
+        authUserId = crypto.randomUUID()
+      }
+    }
+    clientId = authUserId
 
     const { error: profileError } = await supabase
       .from('profiles')
