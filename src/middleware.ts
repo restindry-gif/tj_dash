@@ -6,21 +6,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Public routes - no auth needed
-  const publicRoutes = [
-    '/',
-    '/auth/login',
-    '/auth/setup',
-  ]
-
+  const publicRoutes = ['/', '/auth/login', '/auth/setup', '/unauthorized']
   if (publicRoutes.includes(pathname)) {
     return NextResponse.next()
   }
 
   // Create Supabase client with cookies
   let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request: { headers: request.headers },
   })
 
   const supabase = createServerClient(
@@ -28,9 +21,7 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
+        getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
@@ -40,58 +31,46 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Get session
   const { data } = await supabase.auth.getSession()
   const session = data.session
+  const role = session?.user.user_metadata?.role as string | undefined
 
-  // Protected routes - require authentication
+  const unauthorized = (from: string) =>
+    NextResponse.redirect(new URL(`/unauthorized?from=${encodeURIComponent(from)}`, request.url))
+
+  // /admin — admin, staff only
   if (pathname.startsWith('/admin')) {
-    if (!session) {
-      return NextResponse.redirect(new URL('/auth/login', request.url))
-    }
+    if (!session) return NextResponse.redirect(new URL('/auth/login', request.url))
+    if (role !== 'admin' && role !== 'staff') return unauthorized(pathname)
 
-    // /admin/staff - only admin can access
+    // /admin/customers, /admin/staff — admin only
     if (
-      pathname === '/admin/staff' &&
-      session.user.user_metadata?.role !== 'admin'
+      (pathname.startsWith('/admin/staff') || pathname.startsWith('/admin/customers')) &&
+      role !== 'admin'
     ) {
-      return NextResponse.redirect(new URL('/admin', request.url))
+      return unauthorized(pathname)
     }
 
     return response
   }
 
-  // Staff routes
+  // /staff — admin, staff only
   if (pathname.startsWith('/staff')) {
-    if (!session) {
-      return NextResponse.redirect(new URL('/auth/login', request.url))
-    }
-    const role = session.user.user_metadata?.role
-    if (role !== 'staff' && role !== 'admin') {
-      return NextResponse.redirect(new URL('/admin', request.url))
-    }
+    if (!session) return NextResponse.redirect(new URL('/auth/login', request.url))
+    if (role !== 'staff' && role !== 'admin') return unauthorized(pathname)
     return response
   }
 
-  // Report share routes — require any authenticated user
-  // TODO: when customer-case linking is implemented, restrict customers to their own case reports
+  // /reports — any authenticated user
   if (pathname.startsWith('/reports')) {
-    if (!session) {
-      return NextResponse.redirect(new URL('/auth/login', request.url))
-    }
+    if (!session) return NextResponse.redirect(new URL('/auth/login', request.url))
     return response
   }
 
-  // Customer routes
+  // /customer — customer only
   if (pathname.startsWith('/customer')) {
-    if (!session) {
-      return NextResponse.redirect(new URL('/auth/login', request.url))
-    }
-
-    if (session.user.user_metadata?.role !== 'customer') {
-      return NextResponse.redirect(new URL('/admin', request.url))
-    }
-
+    if (!session) return NextResponse.redirect(new URL('/auth/login', request.url))
+    if (role !== 'customer') return unauthorized(pathname)
     return response
   }
 
@@ -99,8 +78,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    // Match all paths except static files and api
-    '/((?!_next/static|_next/image|favicon.ico|api).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api).*)'],
 }
