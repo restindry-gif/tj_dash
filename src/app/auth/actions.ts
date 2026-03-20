@@ -9,14 +9,12 @@ import { createDatabaseClient } from '@/lib/supabase/client'
 /**
  * Login with email and password
  */
-export async function loginAction(formData: FormData) {
+export async function loginAction(formData: FormData): Promise<{ error: string } | void> {
   const email = (formData.get('email') as string)?.trim() || ''
   const password = (formData.get('password') as string)?.trim() || ''
 
-  console.log('🔐 Login attempt:', { email, passwordLength: password.length })
-
   if (!email || !password) {
-    throw new Error('이메일과 비밀번호를 입력해주세요.')
+    return { error: '이메일과 비밀번호를 입력해주세요.' }
   }
 
   const cookieStore = await cookies()
@@ -42,29 +40,15 @@ export async function loginAction(formData: FormData) {
     password,
   })
 
-  console.log('🔐 Auth response:', {
-    hasSession: !!data?.session,
-    error: error?.message,
-  })
-
-  if (error) {
-    console.error('❌ Login error:', error.message)
-    throw new Error(
-      `로그인 실패: ${error.message || '이메일 또는 비밀번호가 틀렸습니다.'}`
-    )
+  if (error || !data.session) {
+    const msg = error?.message ?? ''
+    if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('credentials')) {
+      return { error: '이메일 또는 비밀번호가 올바르지 않습니다.' }
+    }
+    return { error: msg || '로그인에 실패했습니다.' }
   }
 
-  if (!data.session) {
-    console.error('❌ No session returned')
-    throw new Error('로그인에 실패했습니다.')
-  }
-
-  console.log('✅ Login successful:', {
-    email: data.session.user.email,
-    role: data.session.user.user_metadata?.role,
-  })
-
-  // Redirect based on role
+  // redirect() throws NEXT_REDIRECT — must be outside try/catch
   const role = data.session.user.user_metadata?.role
   if (role === 'admin') {
     redirect('/admin')

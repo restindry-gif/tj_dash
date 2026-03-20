@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ReportForm } from './report-form'
 import { WorkSessionControl } from './work-session-control'
+import { CopyLinkButton } from '@/components/copy-link-button'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: '대기 중',
@@ -51,6 +52,15 @@ export default async function StaffCaseDetailPage({
       .eq('case_id', id)
       .order('created_at', { ascending: false }),
   ])
+
+  // 의뢰인 정보 조회
+  const { data: client } = caseData?.client_id
+    ? await supabase
+        .from('profiles')
+        .select('full_name, phone')
+        .eq('id', caseData.client_id)
+        .maybeSingle()
+    : { data: null }
 
   if (!caseData) {
     return (
@@ -113,6 +123,41 @@ export default async function StaffCaseDetailPage({
         </div>
       )}
 
+      {/* 의뢰인 연락처 */}
+      {client && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">의뢰인</p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-blue-500/15 border border-blue-500/20 flex items-center justify-center shrink-0">
+                <span className="text-sm font-bold text-blue-400">
+                  {(client.full_name ?? '?')[0]}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-200">{client.full_name ?? '(이름 없음)'}</p>
+                {client.phone && (
+                  <a href={`tel:${client.phone}`} className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                    {client.phone}
+                  </a>
+                )}
+              </div>
+            </div>
+            {client.phone && (
+              <a
+                href={`tel:${client.phone}`}
+                className="flex items-center gap-1.5 text-xs bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.79-1.79a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                전화
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* 현장 보고 작성 */}
       {/* 현장 보고 작성 */}
       <div id="report-form" className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-1">
@@ -137,7 +182,7 @@ export default async function StaffCaseDetailPage({
         ) : (
           <div className="p-3 space-y-2.5">
             {reports.map((report) => (
-              <ReportItem key={report.id} report={report as CaseReport} />
+              <ReportItem key={report.id} report={report as CaseReport} caseId={id} />
             ))}
           </div>
         )}
@@ -184,7 +229,7 @@ const REPORT_TYPE_CONFIG: Record<string, { label: string; accent: string; badge:
   },
 }
 
-function ReportItem({ report }: { report: CaseReport }) {
+function ReportItem({ report, caseId }: { report: CaseReport; caseId: string }) {
   const cfg = REPORT_TYPE_CONFIG[report.report_type] ?? REPORT_TYPE_CONFIG.text
 
   return (
@@ -204,9 +249,12 @@ function ReportItem({ report }: { report: CaseReport }) {
             </span>
           )}
         </div>
-        <time className="text-[11px] text-slate-500 tabular-nums">
-          {new Date(report.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-        </time>
+        <div className="flex items-center gap-2 shrink-0">
+          <CopyLinkButton path={`/reports/${report.id}`} />
+          <time className="text-[11px] text-slate-500 tabular-nums">
+            {new Date(report.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          </time>
+        </div>
       </div>
       {/* 바디 */}
       <div className="px-4 py-3 space-y-2.5">

@@ -74,6 +74,15 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
+  // Report share routes — require any authenticated user
+  // TODO: when customer-case linking is implemented, restrict customers to their own case reports
+  if (pathname.startsWith('/reports')) {
+    if (!session) {
+      return NextResponse.redirect(new URL('/auth/login', request.url))
+    }
+    return response
+  }
+
   // Customer routes
   if (pathname.startsWith('/customer')) {
     if (!session) {

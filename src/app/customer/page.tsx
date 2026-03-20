@@ -1,112 +1,75 @@
+import { getCurrentUser } from '@/lib/auth/session'
 import { createDatabaseClient } from '@/lib/supabase/client'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
 
-// Helper for date formatting
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  pending:   { label: '대기 중',     color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+  active:    { label: '조사 진행 중', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  completed: { label: '완료',        color: 'bg-green-500/10 text-green-400 border-green-500/20' },
+  cancelled: { label: '취소',        color: 'bg-red-500/10 text-red-400 border-red-500/20' },
 }
 
-export default async function CustomerPage() {
-  // For now, this page shows all cases
-  // In the future with authentication, this would show only the logged-in customer's cases
-  const supabase = createDatabaseClient()
+export default async function CustomerDashboard() {
+  const user = await getCurrentUser()
 
-  // Fetch all cases (simplified query without joins for now)
-  const { data: cases, error } = await supabase
-    .from('cases')
-    .select('*')
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error('Error fetching customer cases:', error)
-    return <div>Error loading cases</div>
+  if (!user) {
+    redirect('/auth/login')
   }
 
-  return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <h1 className="text-2xl font-bold mb-6">전체 의뢰 현황</h1>
+  const supabase = createDatabaseClient()
+  const { data: cases } = await supabase
+    .from('cases')
+    .select('id, title, status, created_at, fee_amount, advance_payment')
+    .eq('client_id', user.id)
+    .order('created_at', { ascending: false })
 
-      {cases?.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg border shadow-sm">
-          <p className="text-gray-500">등록된 의뢰가 없습니다.</p>
+  return (
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-lg font-semibold text-slate-100">나의 의뢰</h1>
+        <p className="text-sm text-slate-500 mt-0.5">의뢰 내역과 현장 보고를 확인할 수 있습니다.</p>
+      </div>
+
+      {!cases?.length ? (
+        <div className="text-center py-16 border border-slate-800 rounded-xl bg-slate-900/30">
+          <p className="text-slate-500 text-sm">등록된 의뢰가 없습니다.</p>
         </div>
       ) : (
-        <div className="grid gap-6">
-          {cases?.map((item) => (
-            <Card key={item.id}>
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg">{item.title}</CardTitle>
-                    <div className="text-sm text-gray-500 mt-1">
-                      등록일: {formatDate(item.created_at)}
-                    </div>
-                  </div>
-                  <StatusBadge status={item.status} />
+        <div className="space-y-3">
+          {cases.map((c) => {
+            const st = STATUS_CONFIG[c.status] ?? { label: c.status, color: 'bg-slate-700/50 text-slate-400 border-slate-600/30' }
+            const remaining = c.fee_amount != null && c.advance_payment != null
+              ? c.fee_amount - c.advance_payment
+              : null
+            return (
+              <Link
+                key={c.id}
+                href={`/customer/cases/${c.id}`}
+                className="block bg-slate-900/60 border border-slate-800 rounded-xl p-4 hover:border-slate-700 hover:bg-slate-900 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <h2 className="text-sm font-semibold text-slate-100 leading-snug">{c.title}</h2>
+                  <span className={`shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full border ${st.color}`}>
+                    {st.label}
+                  </span>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {item.fee_amount && (
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">착수금</h4>
-                      <p className="text-sm text-gray-900">
-                        {item.fee_amount.toLocaleString('ko-KR')}원
-                      </p>
-                    </div>
-                  )}
-
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-900 mb-1">상세 내용</h4>
-                    <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                      {item.description || '내용 없음'}
-                    </p>
-                  </div>
-
-                  {item.consultation_notes && (
-                    <div className="pt-4 border-t">
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">상담 내용</h4>
-                      <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                        {item.consultation_notes}
-                      </p>
-                    </div>
+                <div className="flex items-center gap-4 text-xs text-slate-500">
+                  <span>{new Date(c.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  {c.fee_amount && (
+                    <span className="text-slate-400">
+                      착수금 <span className="text-slate-300 font-medium">{c.advance_payment?.toLocaleString('ko-KR') ?? '-'}원</span>
+                      {remaining != null && remaining > 0 && (
+                        <span className="text-slate-500"> / 잔금 {remaining.toLocaleString('ko-KR')}원</span>
+                      )}
+                    </span>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>
-  )
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    active: 'bg-blue-100 text-blue-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800',
-  }
-  
-  const labels: Record<string, string> = {
-    pending: '대기 중',
-    active: '조사 진행 중',
-    completed: '완료됨',
-    cancelled: '취소됨',
-  }
-
-  return (
-    <span
-      className={`rounded-full px-3 py-1 text-xs font-medium ${
-        styles[status] || 'bg-gray-100 text-gray-800'
-      }`}
-    >
-      {labels[status] || status}
-    </span>
   )
 }

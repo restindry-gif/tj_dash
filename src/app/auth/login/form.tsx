@@ -10,24 +10,23 @@ export default function LoginForm() {
   const handleSubmit = async (formData: FormData) => {
     setPending(true)
     setError('')
+
     try {
-      await loginAction(formData)
-      // redirect() throws internally — if we get here without error, stay pending
-    } catch (err) {
-      // Next.js redirect() throws a special error — let it propagate
-      if (err instanceof Error && err.message === 'NEXT_REDIRECT') {
-        return
+      const result = await loginAction(formData)
+
+      if (result?.error) {
+        setError(result.error)
+        setPending(false)
       }
-      // Also handle the object form Next.js uses internally
-      if (err && typeof err === 'object' && 'digest' in err && String((err as { digest: unknown }).digest).startsWith('NEXT_REDIRECT')) {
-        return
-      }
-      const message = err instanceof Error ? err.message : '로그인에 실패했습니다.'
-      if (message.includes('Invalid login') || message.includes('invalid_credentials') || message.includes('틀렸습니다')) {
-        setError('이메일 또는 비밀번호가 올바르지 않습니다.')
-      } else {
-        setError(message.replace('로그인 실패: ', ''))
-      }
+      // void = redirect happening, stay pending
+    } catch (err: unknown) {
+      // NEXT_REDIRECT is thrown by redirect() — navigation is in progress, not an error
+      const digest = err && typeof err === 'object' && 'digest' in err
+        ? String((err as { digest: unknown }).digest)
+        : ''
+      if (digest.startsWith('NEXT_REDIRECT')) return
+
+      setError('로그인 중 오류가 발생했습니다.')
       setPending(false)
     }
   }

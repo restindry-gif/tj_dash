@@ -75,8 +75,18 @@ const sectionItems = [
     ],
   },
   {
-    section: '설정',
+    section: '관리',
     items: [
+      {
+        href: '/admin/customers',
+        label: '고객 관리',
+        icon: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+          </svg>
+        ),
+      },
       {
         href: '/admin/staff',
         label: '직원 관리',
@@ -101,6 +111,8 @@ export function SidebarClient({ userEmail, userRole }: SidebarClientProps) {
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return pathname === href
     if (pathname === href) return true
+    // 실제 prefix 일치 여부를 먼저 확인 (slice 위치만 비교하면 오판 발생)
+    if (!pathname.startsWith(href)) return false
     const sub = pathname.slice(href.length)
     // 하위 경로에서 active - 단 /new, /new/ 는 별개 메뉴이므로 제외
     return sub.startsWith('/') && sub.slice(1) !== 'new' && !sub.slice(1).startsWith('new/')

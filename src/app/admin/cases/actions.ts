@@ -1,9 +1,9 @@
 'use server'
 
 import { createDatabaseClient } from '@/lib/supabase/client'
+import { createAuthUser } from '@/lib/auth/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { v4 as uuidv4 } from 'uuid'
 
 export async function createCase(formData: FormData) {
   const supabase = createDatabaseClient()
@@ -16,9 +16,12 @@ export async function createCase(formData: FormData) {
     const email = formData.get('clientEmail') as string
     const fullName = formData.get('clientName') as string
     const phone = formData.get('clientPhone') as string
+    const password = (formData.get('clientPassword') as string) || 'temp1234'
 
-    // Create customer profile with a UUID
-    clientId = uuidv4()
+    // Create auth user first, use auth user's ID as profile ID
+    const authUser = await createAuthUser(email, password, 'customer')
+    clientId = authUser.id
+
     const { error: profileError } = await supabase
       .from('profiles')
       .insert({
