@@ -74,6 +74,7 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
 
   // Route
   const [routeActive, setRouteActive] = useState(false)
+  const [routeConfirming, setRouteConfirming] = useState(false)
   const [routePoints, setRoutePoints] = useState(0)
   const [routeSaving, setRouteSaving] = useState(false)
 
@@ -253,16 +254,28 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
     setRouteActive(true)
   }
 
-  const stopRoute = async () => {
-    setRouteSaving(true)
+  const stopRoute = () => {
     if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current)
+    setRouteActive(false)
+    setRouteConfirming(true)
+  }
+
+  const cancelRoute = () => {
+    setRouteConfirming(false)
+    setRoutePoints(0)
+    allPointsRef.current = []
+    pendingRef.current = []
+  }
+
+  const confirmRoute = async () => {
+    setRouteSaving(true)
+    setRouteConfirming(false)
     await flushPoints()
     const pts = allPointsRef.current
     const km = calcDistance(pts)
     const mins = Math.round((Date.now() - routeStartRef.current) / 60000)
     const summary = `동선 추적 완료 — ${pts.length}개 위치, ${km.toFixed(2)}km, 약 ${mins}분`
     await endRouteReport(routeReportIdRef.current, pts.length, km, summary)
-    setRouteActive(false)
     setRoutePoints(0)
     setRouteSaving(false)
     showToast('동선 저장 완료')
@@ -325,17 +338,52 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
       <div className="flex-1 flex flex-col items-center justify-center px-5 gap-4 overflow-hidden" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}>
 
         {/* 동선 추적 상태 바 */}
-        {routeActive && (
-          <div className="w-full space-y-1.5">
-            <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-4 py-2.5">
-              <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
-              <span className="text-orange-400 text-sm font-medium">동선 추적 중</span>
-              <span className="text-slate-500 text-xs ml-auto">{routePoints}개 위치 기록됨</span>
-            </div>
-            {routePoints <= 3 && (
-              <p className="text-xs text-slate-500 text-center">
-                3개 이하의 동선 포인트는 보고 시 지도 정보가 포함되지 않습니다
-              </p>
+        {(routeActive || routeConfirming) && (
+          <div className="w-full space-y-2">
+            {routeActive && (
+              <>
+                <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-4 py-2.5">
+                  <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
+                  <span className="text-orange-400 text-sm font-medium">동선 추적 중</span>
+                  <span className="text-slate-500 text-xs ml-auto">{routePoints}개 위치 기록됨</span>
+                </div>
+                {routePoints <= 3 && (
+                  <p className="text-xs text-slate-500 text-center">
+                    3개 이하의 동선 포인트는 보고 시 지도 정보가 포함되지 않습니다
+                  </p>
+                )}
+              </>
+            )}
+            {routeConfirming && (
+              <div className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-slate-50">{routePoints}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">기록된 위치</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-slate-50">{calcDistance(allPointsRef.current).toFixed(2)}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">이동거리 (km)</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={cancelRoute}
+                    className="h-11 rounded-xl bg-slate-700 text-slate-300 text-sm font-semibold cursor-pointer active:scale-[0.97] transition-all"
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="button"
+                    onClick={confirmRoute}
+                    disabled={routeSaving}
+                    className="h-11 rounded-xl bg-orange-600 text-white text-sm font-semibold cursor-pointer active:scale-[0.97] transition-all disabled:opacity-50"
+                  >
+                    {routeSaving ? '저장 중...' : '보고하기'}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -536,7 +584,7 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
           <button
             type="button"
             onClick={routeActive ? stopRoute : startRoute}
-            disabled={routeSaving}
+            disabled={routeSaving || routeConfirming}
             className={`flex flex-col items-center justify-center gap-1.5 h-[68px] rounded-2xl text-xs font-medium transition-all cursor-pointer active:scale-[0.96] disabled:opacity-50 ${
               routeActive
                 ? 'bg-orange-500/20 border border-orange-500/40 text-orange-300'

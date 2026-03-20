@@ -39,7 +39,7 @@ function totalDistance(points: TrackPoint[]) {
 const BATCH_SIZE = 10
 
 export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps) {
-  const [status, setStatus] = useState<'idle' | 'tracking' | 'saving' | 'done'>('idle')
+  const [status, setStatus] = useState<'idle' | 'tracking' | 'confirming' | 'saving' | 'done'>('idle')
   const [pointCount, setPointCount] = useState(0)
   const [error, setError] = useState('')
   const [elapsed, setElapsed] = useState(0)
@@ -177,14 +177,25 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
     )
   }
 
-  const stopTracking = async () => {
+  const stopTracking = () => {
     recognitionRef.current?.stop()
     setListening(false)
-    setStatus('saving')
-
     if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current)
     if (timerRef.current) clearInterval(timerRef.current)
+    setStatus('confirming')
+  }
 
+  const cancelTracking = () => {
+    setStatus('idle')
+    setPointCount(0)
+    setElapsed(0)
+    setNote('')
+    allPointsRef.current = []
+    pendingRef.current = []
+  }
+
+  const submitTracking = async () => {
+    setStatus('saving')
     await flushPoints()
 
     const points = allPointsRef.current
@@ -314,8 +325,46 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
             onClick={stopTracking}
             className="w-full min-h-[52px] bg-orange-600 hover:bg-orange-500 active:bg-orange-700 text-white text-base font-semibold rounded-xl transition-colors cursor-pointer active:scale-[0.98]"
           >
-            추적 종료 및 보고
+            추적 종료
           </button>
+        </div>
+      )}
+
+      {status === 'confirming' && (
+        <div className="space-y-3">
+          {/* 요약 */}
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 space-y-2">
+            <p className="text-xs text-slate-500 uppercase tracking-wider">동선 추적 결과</p>
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <div className="text-center">
+                <p className="text-xl font-bold text-slate-50">{pointCount}</p>
+                <p className="text-xs text-slate-500 mt-0.5">기록된 위치</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xl font-bold text-slate-50">{totalDistance(allPointsRef.current).toFixed(2)}</p>
+                <p className="text-xs text-slate-500 mt-0.5">이동거리 (km)</p>
+              </div>
+            </div>
+            {note.trim() && (
+              <p className="text-slate-300 text-sm bg-slate-700/50 rounded-lg px-3 py-2 whitespace-pre-wrap">{note}</p>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={cancelTracking}
+              className="min-h-[52px] bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-xl transition-colors cursor-pointer active:scale-[0.98]"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={submitTracking}
+              className="min-h-[52px] bg-orange-600 hover:bg-orange-500 active:bg-orange-700 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer active:scale-[0.98]"
+            >
+              보고하기
+            </button>
+          </div>
         </div>
       )}
 
