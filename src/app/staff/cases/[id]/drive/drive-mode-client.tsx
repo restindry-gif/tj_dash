@@ -71,6 +71,12 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState('')
 
+  // Route confirming: note + photo
+  const [routeNote, setRouteNote] = useState('')
+  const [routePhoto, setRoutePhoto] = useState<{ preview: string; blob: Blob } | null>(null)
+  const [routePhotoCompressing, setRoutePhotoCompressing] = useState(false)
+  const routePhotoInputRef = useRef<HTMLInputElement>(null)
+
   // Refs
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
   const finalRef = useRef('')
@@ -167,6 +173,36 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
     setPhotoCompressing(false)
   }
 
+  // ── Route photo ────────────────────────────────────
+  const handleRoutePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setRoutePhotoCompressing(true)
+    try {
+      const blob = await compressImage(file)
+      setRoutePhoto({ preview: URL.createObjectURL(blob), blob })
+    } catch { /* ignore */ }
+    setRoutePhotoCompressing(false)
+  }
+
+  const handleRouteSubmit = async () => {
+    let mediaUrl: string | undefined
+    if (routePhoto) {
+      const supabase = createDatabaseClient()
+      const path = `${caseId}/${staffId}/${Date.now()}.jpg`
+      const { error } = await supabase.storage.from('case-reports').upload(path, routePhoto.blob, { contentType: 'image/jpeg' })
+      if (!error) {
+        const { data: { publicUrl } } = supabase.storage.from('case-reports').getPublicUrl(path)
+        mediaUrl = publicUrl
+      }
+    }
+    await submitTracking(routeNote, mediaUrl)
+    setRouteNote('')
+    setRoutePhoto(null)
+    showToast('동선 저장 완료')
+  }
+
   // ── Submit ─────────────────────────────────────────
   const handleSubmit = async () => {
     if (!transcript.trim() && !photo && !gps) return
@@ -240,19 +276,50 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
             )}
             {routeStatus === 'confirming' && (
               <div className="w-full bg-slate-800 border border-slate-700 rounded-2xl p-4 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-slate-50">{routePoints}</p>
+                {/* 통계 */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="text-center bg-slate-700/40 rounded-xl py-2.5">
+                    <p className="text-lg font-bold text-slate-50 tabular-nums">{routePoints}</p>
                     <p className="text-xs text-slate-500 mt-0.5">기록된 위치</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-slate-50">{routeKm.toFixed(2)}</p>
+                  <div className="text-center bg-slate-700/40 rounded-xl py-2.5">
+                    <p className="text-lg font-bold text-slate-50 tabular-nums">{routeKm.toFixed(2)}</p>
                     <p className="text-xs text-slate-500 mt-0.5">이동거리 (km)</p>
                   </div>
                 </div>
+                {/* 코멘트 */}
+                <textarea
+                  value={routeNote}
+                  onChange={(e) => setRouteNote(e.target.value)}
+                  placeholder="보고 내용 입력 (선택)"
+                  rows={2}
+                  className="w-full bg-slate-700/50 border border-slate-600 focus:border-orange-500/50 rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-500 focus:outline-none resize-none leading-relaxed"
+                  style={{ fontSize: '16px' }}
+                />
+                {/* 사진 */}
+                {routePhoto ? (
+                  <div className="relative rounded-xl overflow-hidden border border-slate-600">
+                    <img src={routePhoto.preview} alt="첨부 사진" className="w-full max-h-32 object-cover" />
+                    <button type="button" onClick={() => setRoutePhoto(null)} className="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center bg-black/60 rounded-full text-white cursor-pointer">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => routePhotoInputRef.current?.click()} disabled={routePhotoCompressing}
+                    className="w-full flex items-center justify-center gap-2 h-9 bg-slate-700/50 border border-slate-600 text-slate-400 text-xs rounded-xl cursor-pointer disabled:opacity-50">
+                    {routePhotoCompressing
+                      ? <svg className="animate-spin w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                      : <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                    }
+                    사진 첨부 (선택)
+                  </button>
+                )}
+                {/* 취소 / 보고 */}
                 <div className="grid grid-cols-2 gap-2">
-                  <button type="button" onClick={cancelTracking} className="h-11 rounded-xl bg-slate-700 text-slate-300 text-sm font-semibold cursor-pointer active:scale-[0.97] transition-all">취소</button>
-                  <button type="button" onClick={async () => { await submitTracking(); showToast('동선 저장 완료') }} className="h-11 rounded-xl bg-orange-600 text-white text-sm font-semibold cursor-pointer active:scale-[0.97] transition-all">보고하기</button>
+                  <button type="button" onClick={() => { cancelTracking(); setRouteNote(''); setRoutePhoto(null) }}
+                    className="h-11 rounded-xl bg-slate-700 text-slate-300 text-sm font-semibold cursor-pointer active:scale-[0.97] transition-all">취소</button>
+                  <button type="button" onClick={handleRouteSubmit}
+                    className="h-11 rounded-xl bg-orange-600 text-white text-sm font-semibold cursor-pointer active:scale-[0.97] transition-all">보고하기</button>
                 </div>
               </div>
             )}
@@ -482,6 +549,7 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
       </div>
 
       <input ref={photoInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoSelect} />
+      <input ref={routePhotoInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleRoutePhotoSelect} />
     </div>
   )
 }
