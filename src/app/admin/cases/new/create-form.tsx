@@ -19,6 +19,7 @@ export function CreateCaseForm({
 }) {
   const [clientMode, setClientMode] = useState<'new' | 'existing'>('new')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [feeDisplay, setFeeDisplay] = useState('')
   const [advanceDisplay, setAdvanceDisplay] = useState('')
 
@@ -49,16 +50,21 @@ export function CreateCaseForm({
     <form
       action={async (formData) => {
         setIsSubmitting(true)
+        setSubmitError('')
         try {
-          await createCase(formData)
+          const result = await createCase(formData)
+          if (result?.error) {
+            setSubmitError(result.error)
+            setIsSubmitting(false)
+          }
+          // void = redirect happening
         } catch (err: unknown) {
           const digest = err && typeof err === 'object' && 'digest' in err
             ? String((err as { digest: unknown }).digest) : ''
-          if (!digest.startsWith('NEXT_REDIRECT')) {
-            console.error('사건 등록 오류:', err)
-          }
+          if (digest.startsWith('NEXT_REDIRECT')) return
+          setSubmitError('사건 등록 중 오류가 발생했습니다.')
+          setIsSubmitting(false)
         }
-        setIsSubmitting(false)
       }}
       className="space-y-6 max-w-3xl"
     >
@@ -278,6 +284,9 @@ export function CreateCaseForm({
           {isSubmitting ? '등록 중...' : '사건 등록 완료'}
         </button>
       </div>
+      {submitError && (
+        <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">{submitError}</p>
+      )}
     </form>
   )
 }

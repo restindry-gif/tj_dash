@@ -5,7 +5,7 @@ import { createAuthUser, getAuthUserByEmail } from '@/lib/auth/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-export async function createCase(formData: FormData) {
+export async function createCase(formData: FormData): Promise<{ error: string } | void> {
   const supabase = createDatabaseClient()
 
   const clientMode = formData.get('clientMode') // 'new' or 'existing'
@@ -19,19 +19,24 @@ export async function createCase(formData: FormData) {
     const password = (formData.get('clientPassword') as string) || 'temp1234'
 
     // Create auth user first, use auth user's ID as profile ID
-    let authUserId: string
+    let authUserId: string | null = null
     try {
       const authUser = await createAuthUser(email, password, 'customer')
       authUserId = authUser.id
-    } catch {
-      // Email already registered or auth error — try to find existing
+    } catch (e1) {
+      // Email already registered — reuse existing auth user
       try {
         const existing = await getAuthUserByEmail(email)
-        authUserId = existing?.id ?? crypto.randomUUID()
+        authUserId = existing?.id ?? null
       } catch {
-        authUserId = crypto.randomUUID()
+        authUserId = null
       }
     }
+
+    if (!authUserId) {
+      return { error: '고객 계정 생성에 실패했습니다. 이메일을 확인해주세요.' }
+    }
+
     clientId = authUserId
 
     const { error: profileError } = await supabase
@@ -45,7 +50,7 @@ export async function createCase(formData: FormData) {
       })
 
     if (profileError) {
-      console.error('Error creating customer profile:', profileError)
+      return { error: `고객 프로필 생성 실패: ${profileError.message}` }
     }
   }
 
