@@ -15,7 +15,11 @@
       "Bash(python scripts/search.py \"dashboard analytics data\" --domain color -n 3)",
       "Bash(vercel --version)",
       "Bash(npm install:*)",
-      "Bash(npx vercel:*)"
+      "Bash(npx vercel:*)",
+      "Read(//c/Users/offic/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.0.1/**)",
+      "Bash(python3 skills/ui-ux-pro-max/scripts/search.py \"mobile dashboard field worker dark professional\" --design-system -p \"TJ Staff Mobile\")",
+      "Bash(python3 src/ui-ux-pro-max/scripts/search.py \"mobile field worker staff dashboard dark\" --design-system -p \"TJ Detective Staff\")",
+      "Bash(python3 src/ui-ux-pro-max/scripts/search.py \"touch target mobile navigation bottom bar\" --domain ux)"
     ]
   }
 }

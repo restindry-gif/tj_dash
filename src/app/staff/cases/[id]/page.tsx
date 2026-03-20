@@ -18,6 +18,18 @@ const STATUS_STYLES: Record<string, string> = {
   cancelled: 'bg-red-400/10 text-red-400 border border-red-400/20',
 }
 
+interface CaseReport {
+  id: string
+  report_type: string
+  content: string | null
+  address: string | null
+  lat: number | null
+  lng: number | null
+  media_url: string | null
+  is_live: boolean
+  created_at: string
+}
+
 export default async function StaffCaseDetailPage({
   params,
 }: {
@@ -48,46 +60,52 @@ export default async function StaffCaseDetailPage({
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="space-y-4 max-w-2xl mx-auto">
+      {/* 뒤로가기 + 제목 */}
       <div className="flex items-center gap-3">
-        <Link href="/staff" className="text-slate-400 hover:text-slate-300 text-sm transition-colors">← 목록으로</Link>
+        <Link
+          href="/staff"
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+          aria-label="뒤로가기"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </Link>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-lg font-bold text-slate-50 truncate">{caseData.title || '(제목 없음)'}</h1>
+        </div>
+        <span className={`text-xs rounded-full px-3 py-1.5 font-medium shrink-0 ${STATUS_STYLES[caseData.status] || 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
+          {STATUS_LABELS[caseData.status] || caseData.status}
+        </span>
       </div>
 
-      {/* 사건 정보 */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <h1 className="text-xl font-bold text-slate-50 leading-tight">{caseData.title || '(제목 없음)'}</h1>
-          <span className={`text-xs rounded-full px-3 py-1 font-medium shrink-0 ${STATUS_STYLES[caseData.status] || 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
-            {STATUS_LABELS[caseData.status] || caseData.status}
-          </span>
+      {/* 사건 개요 */}
+      {caseData.description && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">사건 개요</p>
+          <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">{caseData.description}</p>
         </div>
-        {caseData.description && (
-          <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">사건 개요</p>
-            <p className="text-slate-300 text-sm whitespace-pre-wrap">{caseData.description}</p>
-          </div>
-        )}
-        <p className="text-slate-500 text-xs">등록일: {new Date(caseData.created_at).toLocaleDateString('ko-KR')}</p>
-      </div>
+      )}
 
       {/* 현장 보고 작성 */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+      <div id="report-form" className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
         <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-4">현장 보고 작성</p>
         <ReportForm caseId={id} staffId={user.id} />
       </div>
 
       {/* 보고 내역 */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">보고 내역</p>
-          <span className="text-xs text-slate-500">{reports?.length ?? 0}건</span>
+          <span className="text-xs bg-slate-800 text-slate-400 rounded-full px-2 py-0.5">{reports?.length ?? 0}</span>
         </div>
         {!reports || reports.length === 0 ? (
           <p className="text-slate-500 text-sm text-center py-8">보고 내역이 없습니다.</p>
         ) : (
           <div className="divide-y divide-slate-800">
             {reports.map((report) => (
-              <ReportItem key={report.id} report={report} />
+              <ReportItem key={report.id} report={report as CaseReport} />
             ))}
           </div>
         )}
@@ -96,63 +114,53 @@ export default async function StaffCaseDetailPage({
   )
 }
 
-interface CaseReport {
-  id: string
-  report_type: string
-  content: string | null
-  address: string | null
-  lat: number | null
-  lng: number | null
-  media_url: string | null
-  is_live: boolean
-  created_at: string
-}
-
 function ReportItem({ report }: { report: CaseReport }) {
   const ICONS: Record<string, string> = {
-    text: '✏️',
-    location: '📍',
-    photo: '📷',
-    voice: '🎤',
+    text: '✏️', location: '📍', photo: '📷', voice: '🎤',
+  }
+  const TYPE_LABELS: Record<string, string> = {
+    text: '텍스트', location: '위치', photo: '사진', voice: '음성',
   }
 
   return (
-    <div className="px-6 py-4 space-y-2">
+    <div className="px-4 py-4 space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-base">{ICONS[report.report_type] || '📋'}</span>
-          <span className="text-xs font-medium text-slate-400">
-            {report.report_type === 'text' ? '텍스트 보고'
-              : report.report_type === 'location' ? '위치 보고'
-              : report.report_type === 'photo' ? '사진 보고'
-              : report.report_type === 'voice' ? '음성 보고'
-              : '보고'}
-          </span>
+          <span className="text-base leading-none">{ICONS[report.report_type] || '📋'}</span>
+          <span className="text-xs font-medium text-slate-400">{TYPE_LABELS[report.report_type] || '보고'}</span>
           {report.is_live && (
-            <span className="text-xs bg-red-500/10 text-red-400 border border-red-500/20 rounded-full px-2 py-0.5">LIVE</span>
+            <span className="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 rounded-full px-2 py-0.5 font-medium">LIVE</span>
           )}
         </div>
-        <span className="text-xs text-slate-500">
-          {new Date(report.created_at).toLocaleString('ko-KR')}
+        <span className="text-[11px] text-slate-500">
+          {new Date(report.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
       {report.content && (
-        <p className="text-slate-300 text-sm whitespace-pre-wrap">{report.content}</p>
+        <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">{report.content}</p>
       )}
       {report.address && (
-        <p className="text-slate-400 text-xs flex items-center gap-1">
-          <span>📍</span> {report.address}
-          {report.lat && report.lng && (
-            <span className="text-slate-600 ml-1">({Number(report.lat).toFixed(5)}, {Number(report.lng).toFixed(5)})</span>
-          )}
-        </p>
+        <div className="flex items-start gap-1.5 bg-slate-800/50 rounded-xl p-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 mt-0.5 shrink-0">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+          <div className="flex-1 min-w-0">
+            <p className="text-slate-400 text-xs leading-relaxed">{report.address}</p>
+            {report.lat && report.lng && (
+              <a
+                href={`https://maps.google.com/?q=${report.lat},${report.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 text-xs hover:text-blue-400 underline mt-1 inline-block"
+              >
+                지도에서 보기 →
+              </a>
+            )}
+          </div>
+        </div>
       )}
       {report.media_url && (
-        <img
-          src={report.media_url}
-          alt="현장 사진"
-          className="mt-2 rounded-lg max-h-64 object-cover border border-slate-700"
-        />
+        <img src={report.media_url} alt="현장 사진" className="w-full rounded-xl max-h-56 object-cover border border-slate-700" />
       )}
     </div>
   )
