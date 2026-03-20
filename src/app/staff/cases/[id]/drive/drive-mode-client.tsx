@@ -283,7 +283,7 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
 
   // ── Render ─────────────────────────────────────────
   return (
-    <div className="fixed inset-0 bg-[#020617] flex flex-col select-none overflow-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="fixed inset-0 z-50 bg-[#020617] flex flex-col select-none overflow-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
 
       {/* 헤더 */}
       <div className="flex items-center gap-3 px-4 pt-safe shrink-0" style={{ paddingTop: 'max(env(safe-area-inset-top), 16px)', paddingBottom: '12px' }}>
