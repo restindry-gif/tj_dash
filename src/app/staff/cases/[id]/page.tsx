@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { ReportForm } from './report-form'
 import { RouteTracker } from './route-tracker'
-import { PhotoCapture } from './photo-capture'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: '대기 중',
@@ -114,69 +113,31 @@ export default async function StaffCaseDetailPage({
       )}
 
       {/* 현장 보고 작성 */}
-      <div id="report-form" className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-        <div className="px-4 pt-4 pb-2">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">현장 보고 작성</p>
-        </div>
+      {/* 현장 보고 작성 */}
+      <div id="report-form" className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-1">
+        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">현장 보고 작성</p>
+        <ReportForm caseId={id} staffId={user.id} />
+      </div>
 
-        {/* 탭 스타일 섹션 */}
-        <div className="divide-y divide-slate-800">
-          {/* 텍스트 / 위치 */}
-          <details className="group" open>
-            <summary className="flex items-center justify-between px-4 py-3 cursor-pointer list-none select-none hover:bg-slate-800/50 transition-colors">
-              <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
-                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-                </svg>
-                <span className="text-sm font-medium text-slate-300">텍스트 / 위치 보고</span>
-              </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500 transition-transform group-open:rotate-180">
-                <path d="m6 9 6 6 6-6"/>
+      {/* 동선 추적 */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+        <details className="group">
+          <summary className="flex items-center justify-between px-4 py-3 cursor-pointer list-none select-none hover:bg-slate-800/50 transition-colors">
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+                <circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/>
+                <circle cx="18" cy="5" r="3"/>
               </svg>
-            </summary>
-            <div className="px-4 pb-4 pt-2">
-              <ReportForm caseId={id} staffId={user.id} />
+              <span className="text-sm font-medium text-slate-300">동선 추적</span>
             </div>
-          </details>
-
-          {/* 사진 */}
-          <details className="group">
-            <summary className="flex items-center justify-between px-4 py-3 cursor-pointer list-none select-none hover:bg-slate-800/50 transition-colors">
-              <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
-                  <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/>
-                  <circle cx="12" cy="13" r="3"/>
-                </svg>
-                <span className="text-sm font-medium text-slate-300">사진 전송</span>
-              </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500 transition-transform group-open:rotate-180">
-                <path d="m6 9 6 6 6-6"/>
-              </svg>
-            </summary>
-            <div className="px-4 pb-4 pt-2">
-              <PhotoCapture caseId={id} staffId={user.id} />
-            </div>
-          </details>
-
-          {/* 동선 추적 */}
-          <details className="group">
-            <summary className="flex items-center justify-between px-4 py-3 cursor-pointer list-none select-none hover:bg-slate-800/50 transition-colors">
-              <div className="flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
-                  <circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/>
-                  <circle cx="18" cy="5" r="3"/>
-                </svg>
-                <span className="text-sm font-medium text-slate-300">동선 추적</span>
-              </div>
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500 transition-transform group-open:rotate-180">
-                <path d="m6 9 6 6 6-6"/>
-              </svg>
-            </summary>
-            <div className="px-4 pb-4 pt-2">
-              <RouteTracker caseId={id} staffId={user.id} />
-            </div>
-          </details>
-        </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500 transition-transform group-open:rotate-180">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </summary>
+          <div className="px-4 pb-4 pt-2">
+            <RouteTracker caseId={id} staffId={user.id} />
+          </div>
+        </details>
       </div>
 
       {/* 보고 내역 */}
