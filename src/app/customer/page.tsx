@@ -15,20 +15,10 @@ export default async function CustomerPage() {
   // In the future with authentication, this would show only the logged-in customer's cases
   const supabase = createDatabaseClient()
 
-  // Fetch all cases
+  // Fetch all cases (simplified query without joins for now)
   const { data: cases, error } = await supabase
     .from('cases')
-    .select(`
-      *,
-      client:profiles!client_id (
-        full_name,
-        email
-      ),
-      assigned_staff:profiles!assigned_staff_id (
-        full_name,
-        email
-      )
-    `)
+    .select('*')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -61,20 +51,14 @@ export default async function CustomerPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  {item.fee_amount && (
                     <div>
-                      <h4 className="text-sm font-medium text-gray-500">의뢰인</h4>
-                      <p className="text-sm text-gray-900">{item.client?.full_name}</p>
+                      <h4 className="text-sm font-medium text-gray-500">착수금</h4>
+                      <p className="text-sm text-gray-900">
+                        {item.fee_amount.toLocaleString('ko-KR')}원
+                      </p>
                     </div>
-                    {item.fee_amount && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-500">착수금</h4>
-                        <p className="text-sm text-gray-900">
-                          {item.fee_amount.toLocaleString('ko-KR')}원
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  )}
 
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 mb-1">상세 내용</h4>
@@ -83,11 +67,11 @@ export default async function CustomerPage() {
                     </p>
                   </div>
 
-                  {item.assigned_staff && (
+                  {item.consultation_notes && (
                     <div className="pt-4 border-t">
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">담당 탐정</h4>
-                      <p className="text-sm text-gray-600">
-                        {item.assigned_staff.full_name || '비공개'}
+                      <h4 className="text-sm font-medium text-gray-900 mb-1">상담 내용</h4>
+                      <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                        {item.consultation_notes}
                       </p>
                     </div>
                   )}

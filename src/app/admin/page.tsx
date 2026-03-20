@@ -16,13 +16,7 @@ export default async function AdminPage() {
   // Fetch cases
   const { data: cases, error } = await supabase
     .from('cases')
-    .select(`
-      *,
-      client:profiles!client_id (
-        full_name,
-        email
-      )
-    `)
+    .select('*')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -85,7 +79,7 @@ export default async function AdminPage() {
                         {item.title}
                       </td>
                       <td className="px-6 py-4">
-                        {item.client?.full_name || item.client?.email || 'Unknown'}
+                        {item.client_id || '-'}
                       </td>
                       <td className="px-6 py-4">
                         <StatusBadge status={item.status} />
