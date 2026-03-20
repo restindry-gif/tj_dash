@@ -15,23 +15,24 @@ const formatDate = (dateString: string) => {
 export default async function ConsultationDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const supabase = createDatabaseClient()
 
   const { data: consultation, error } = await supabase
     .from('consultations')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error || !consultation) {
-    console.error('상담 조회 오류:', { error, paramsId: params.id, consultation })
+    console.error('상담 조회 오류:', { error, paramsId: id, consultation })
     return (
       <div className="p-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">상담을 찾을 수 없습니다</h1>
-          <p className="text-gray-600 text-sm mb-4">ID: {params.id}</p>
+          <p className="text-gray-600 text-sm mb-4">ID: {id}</p>
           {error && <p className="text-gray-500 text-xs mb-4">오류: {error.message}</p>}
           <Link href="/admin/consultations" className="text-blue-600 hover:underline">
             상담 목록으로 돌아가기
