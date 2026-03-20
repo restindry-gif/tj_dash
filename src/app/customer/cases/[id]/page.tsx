@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { RouteMapDynamic } from '@/components/route-map-wrapper'
 import { RouteDownloadButton, type TrackPoint } from '@/components/route-download-button'
 import { OriginalRequestButton } from './original-request-button'
+import { ReportFeedback } from './report-feedback'
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   pending:   { label: '대기 중',     color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
@@ -182,7 +183,7 @@ export default async function CustomerCaseDetailPage({
                   </div>
 
                   {/* 바디 */}
-                  <div className="px-4 py-3 space-y-3">
+                  <div className="px-4 py-3 space-y-3 pb-0">
                     {/* 동선 통계 */}
                     {report.report_type === 'route' && (report.total_points || report.distance_km) && (
                       <div className="grid grid-cols-2 gap-2">
@@ -303,6 +304,14 @@ export default async function CustomerCaseDetailPage({
                         </a>
                       </div>
                     )}
+
+                    {/* 고객 피드백 (확인 체크 + 코멘트) */}
+                    <ReportFeedback
+                      reportId={report.id}
+                      caseId={caseData.id}
+                      initialChecked={report.client_checked ?? false}
+                      initialComment={report.client_comment ?? null}
+                    />
                   </div>
                 </div>
               )

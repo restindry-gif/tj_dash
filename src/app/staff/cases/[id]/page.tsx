@@ -32,6 +32,8 @@ interface CaseReport {
   media_url: string | null
   is_live: boolean
   original_requested: boolean | null
+  client_checked: boolean | null
+  client_comment: string | null
   created_at: string
 }
 
@@ -260,6 +262,14 @@ function ReportItem({ report, caseId }: { report: CaseReport; caseId: string }) 
               원본 요청됨
             </span>
           )}
+          {report.client_checked && (
+            <span className="flex items-center gap-1 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full px-2 py-0.5 font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+              의뢰인 확인
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <CopyLinkButton path={`/reports/${report.id}`} />
@@ -289,6 +299,14 @@ function ReportItem({ report, caseId }: { report: CaseReport; caseId: string }) 
         )}
         {report.media_url && (
           <img src={report.media_url} alt="현장 사진" className="w-full rounded-lg max-h-56 object-cover border border-slate-700/40" />
+        )}
+        {report.client_comment && (
+          <div className="flex items-start gap-2 bg-emerald-500/5 border border-emerald-500/15 rounded-lg px-3 py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400 mt-0.5 shrink-0">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <p className="text-xs text-emerald-300 leading-relaxed whitespace-pre-wrap">{report.client_comment}</p>
+          </div>
         )}
       </div>
     </div>
