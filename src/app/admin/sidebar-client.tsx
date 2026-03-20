@@ -98,8 +98,13 @@ export function SidebarClient({ userEmail, userRole }: SidebarClientProps) {
   // Close on route change
   useEffect(() => { setOpen(false) }, [pathname])
 
-  const isActive = (href: string, exact?: boolean) =>
-    exact ? pathname === href : pathname.startsWith(href)
+  const isActive = (href: string, exact?: boolean) => {
+    if (exact) return pathname === href
+    if (pathname === href) return true
+    const sub = pathname.slice(href.length)
+    // 하위 경로에서 active - 단 /new, /new/ 는 별개 메뉴이므로 제외
+    return sub.startsWith('/') && sub.slice(1) !== 'new' && !sub.slice(1).startsWith('new/')
+  }
 
   const NavLink = ({ href, label, icon, exact }: { href: string; label: string; icon: React.ReactNode; exact?: boolean }) => (
     <Link
