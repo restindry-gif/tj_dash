@@ -302,33 +302,29 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
         <p className="text-slate-400 text-sm font-mono tabular-nums shrink-0">{now}</p>
       </div>
 
-      {/* 동선 추적 상태 바 */}
-      {routeActive && (
-        <div className="mx-4 mb-2 flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-4 py-2.5 shrink-0">
-          <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
-          <span className="text-orange-400 text-sm font-medium">동선 추적 중</span>
-          <span className="text-slate-500 text-xs ml-auto">{routePoints}개 위치 기록됨</span>
-        </div>
-      )}
+      {/* 중앙 버튼 + 콘텐츠 영역 */}
+      <div className="flex-1 flex flex-col items-center justify-center px-5 gap-4 overflow-hidden" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}>
 
-      {/* 중앙 콘텐츠 영역 */}
-      <div className="flex-1 flex items-center justify-center px-5 overflow-hidden">
-        {voiceState === 'idle' && !toast && (
-          <p className="text-slate-600 text-sm text-center leading-relaxed">
-            아래 버튼으로 보고를 시작하세요
-          </p>
+        {/* 동선 추적 상태 바 */}
+        {routeActive && (
+          <div className="w-full flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-4 py-2.5">
+            <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
+            <span className="text-orange-400 text-sm font-medium">동선 추적 중</span>
+            <span className="text-slate-500 text-xs ml-auto">{routePoints}개 위치 기록됨</span>
+          </div>
         )}
 
+        {/* 음성 상태 표시 */}
         {voiceState === 'listening' && (
-          <div className="w-full text-center space-y-3">
-            <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="w-full text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
               <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
               </span>
               <span className="text-red-400 text-xs font-medium uppercase tracking-wider">인식 중</span>
             </div>
-            <p className="text-slate-200 text-xl leading-relaxed font-light">
+            <p className="text-slate-200 text-lg leading-relaxed font-light">
               {transcript}
               {interim && <span className="text-slate-500">{interim}</span>}
               {!transcript && !interim && <span className="text-slate-500 animate-pulse">말씀하세요...</span>}
@@ -338,14 +334,13 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
 
         {voiceState === 'confirming' && (
           <div className="w-full space-y-3">
-            <p className="text-xs text-slate-500 uppercase tracking-wider text-center mb-1">인식된 내용 확인</p>
-            <div className="bg-slate-800/70 border border-slate-700/50 rounded-2xl p-4 max-h-40 overflow-y-auto">
+            <p className="text-xs text-slate-500 uppercase tracking-wider text-center">인식된 내용 확인</p>
+            <div className="bg-slate-800/70 border border-slate-700/50 rounded-2xl p-4 max-h-36 overflow-y-auto">
               <p className="text-slate-100 text-base leading-relaxed">{transcript}</p>
             </div>
-            {/* 첨부 미리보기 */}
             {photo && (
               <div className="relative rounded-xl overflow-hidden border border-violet-500/20">
-                <img src={photo.preview} alt="첨부 사진" className="w-full max-h-28 object-cover" />
+                <img src={photo.preview} alt="첨부 사진" className="w-full max-h-24 object-cover" />
                 <button type="button" onClick={() => setPhoto(null)} className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-black/60 rounded-full text-white cursor-pointer">
                   <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
                 </button>
@@ -373,13 +368,68 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
             {toast}
           </div>
         )}
-      </div>
 
-      {/* 하단 버튼 영역 */}
-      <div className="px-4 shrink-0 space-y-3" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 24px)' }}>
+        {/* 🎙️ 메인 녹음 버튼 (최상단, 가장 크게) */}
+        {voiceState !== 'confirming' ? (
+          <button
+            type="button"
+            onClick={voiceState === 'idle' ? startListening : stopListening}
+            disabled={!sttSupported}
+            className={`w-full rounded-3xl flex flex-col items-center justify-center gap-3 transition-all cursor-pointer active:scale-[0.98] disabled:opacity-40 h-[130px] ${
+              voiceState === 'listening'
+                ? 'bg-red-500/20 border-2 border-red-500/50'
+                : 'bg-slate-800 border-2 border-slate-700 active:bg-slate-700'
+            }`}
+          >
+            {voiceState === 'listening' ? (
+              <>
+                <span className="relative flex h-5 w-5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-5 w-5 bg-red-500" />
+                </span>
+                <span className="text-red-300 text-base font-semibold">탭하여 완료</span>
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" x2="12" y1="19" y2="22"/>
+                </svg>
+                <span className="text-slate-300 text-base font-semibold">탭하여 말하기</span>
+              </>
+            )}
+          </button>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 w-full h-[130px]">
+            <button
+              type="button"
+              onClick={cancelVoice}
+              className="rounded-3xl bg-slate-800 border-2 border-slate-700 text-slate-300 text-base font-semibold cursor-pointer active:scale-[0.97] active:bg-slate-700 transition-all"
+            >
+              다시 말하기
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="rounded-3xl bg-blue-600 border-2 border-blue-500 text-white text-base font-semibold cursor-pointer active:scale-[0.97] active:bg-blue-700 transition-all disabled:opacity-50"
+            >
+              {submitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  전송 중
+                </span>
+              ) : '보고 전송'}
+            </button>
+          </div>
+        )}
 
         {/* 3개 기능 버튼 */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3 w-full">
           {/* 사진 */}
           <button
             type="button"
@@ -459,64 +509,6 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
           </button>
         </div>
 
-        {/* 메인 버튼: idle/listening → 녹음 버튼 / confirming → 다시/전송 */}
-        {voiceState !== 'confirming' ? (
-          <button
-            type="button"
-            onClick={voiceState === 'idle' ? startListening : stopListening}
-            disabled={!sttSupported}
-            className={`w-full rounded-3xl flex flex-col items-center justify-center gap-3 transition-all cursor-pointer active:scale-[0.98] disabled:opacity-40 ${
-              voiceState === 'listening'
-                ? 'bg-red-500/20 border-2 border-red-500/50 h-[120px]'
-                : 'bg-slate-800 border-2 border-slate-700 h-[120px] active:bg-slate-700'
-            }`}
-          >
-            {voiceState === 'listening' ? (
-              <>
-                <span className="relative flex h-5 w-5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-5 w-5 bg-red-500" />
-                </span>
-                <span className="text-red-300 text-base font-semibold">탭하여 완료</span>
-              </>
-            ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300">
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                  <line x1="12" x2="12" y1="19" y2="22"/>
-                </svg>
-                <span className="text-slate-300 text-base font-semibold">탭하여 말하기</span>
-              </>
-            )}
-          </button>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 h-[120px]">
-            <button
-              type="button"
-              onClick={cancelVoice}
-              className="rounded-3xl bg-slate-800 border-2 border-slate-700 text-slate-300 text-base font-semibold cursor-pointer active:scale-[0.97] active:bg-slate-700 transition-all"
-            >
-              다시 말하기
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="rounded-3xl bg-blue-600 border-2 border-blue-500 text-white text-base font-semibold cursor-pointer active:scale-[0.97] active:bg-blue-700 transition-all disabled:opacity-50"
-            >
-              {submitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                  </svg>
-                  전송 중
-                </span>
-              ) : '보고 전송'}
-            </button>
-          </div>
-        )}
       </div>
 
       <input ref={photoInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoSelect} />
