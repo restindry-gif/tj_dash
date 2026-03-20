@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { ReportForm } from './report-form'
 import { WorkSessionControl } from './work-session-control'
 import { CopyLinkButton } from '@/components/copy-link-button'
+import { CaseStatusForm } from '@/app/admin/cases/[id]/status-form'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: '대기 중',
@@ -159,7 +160,12 @@ export default async function StaffCaseDetailPage({
         </div>
       )}
 
-      {/* 현장 보고 작성 */}
+      {/* 상태 변경 */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">상태 변경</p>
+        <CaseStatusForm caseId={id} currentStatus={caseData.status} />
+      </div>
+
       {/* 현장 보고 작성 */}
       <div id="report-form" className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-1">
         <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">현장 보고 작성</p>

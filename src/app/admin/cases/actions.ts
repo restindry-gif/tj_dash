@@ -99,6 +99,8 @@ export async function updateCaseStatus(caseId: string, status: string) {
 
   revalidatePath('/admin')
   revalidatePath(`/admin/cases/${caseId}`)
+  revalidatePath('/staff')
+  revalidatePath(`/staff/cases/${caseId}`)
 }
 
 /**
