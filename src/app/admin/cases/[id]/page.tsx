@@ -1,5 +1,6 @@
 import { createDatabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CaseStatusForm } from './status-form'
 
 const formatDate = (dateString: string) => {
@@ -69,75 +70,85 @@ export default async function CaseDetailPage({
         </Link>
       </div>
 
-      {/* 기본 정보 */}
-      <div className="bg-white p-6 rounded-lg border shadow-sm space-y-4">
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-1">사건명</h3>
-            <p className="text-lg font-semibold">{caseData.title}</p>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-1">상태</h3>
-            <StatusBadge status={caseData.status} />
-          </div>
-
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-1">의뢰인</h3>
-            <p className="text-gray-700">{client?.full_name || '-'}</p>
-          </div>
-
-          {client?.email && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">이메일</h3>
-              <p className="text-gray-700">{client.email}</p>
+      {/* 1. 의뢰인 정보 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>의뢰인 정보</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-500">이름</label>
+              <p className="text-gray-700">{client?.full_name || '-'}</p>
             </div>
-          )}
-
-          {client?.phone && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">전화번호</h3>
-              <p className="text-gray-700">{client.phone}</p>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-500">전화번호</label>
+              <p className="text-gray-700">{client?.phone || '-'}</p>
             </div>
-          )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-500">이메일</label>
+              <p className="text-gray-700">{client?.email || '-'}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-1">담당자</h3>
-            <p className="text-gray-700">{staffName}</p>
+      {/* 2. 사건 상세 정보 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>사건 상세 정보</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-500">사건명 (Title)</label>
+            <p className="text-gray-700">{caseData.title || '-'}</p>
           </div>
 
-          {caseData.fee_amount && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">착수금</h3>
-              <p className="text-gray-700">₩{caseData.fee_amount.toLocaleString()}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-500">착수금/수임료 (원)</label>
+              <p className="text-gray-700">
+                {caseData.fee_amount ? `₩${caseData.fee_amount.toLocaleString()}` : '-'}
+              </p>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* 사건 개요 */}
-      <div className="bg-white p-6 rounded-lg border shadow-sm space-y-4">
-        <h2 className="text-lg font-semibold">사건 개요</h2>
-        <div className="bg-gray-50 p-4 rounded whitespace-pre-wrap text-gray-700">
-          {caseData.description}
-        </div>
-      </div>
-
-      {/* 상담 내용 */}
-      {caseData.consultation_notes && (
-        <div className="bg-white p-6 rounded-lg border shadow-sm space-y-4">
-          <h2 className="text-lg font-semibold">상담 내용</h2>
-          <div className="bg-blue-50 p-4 rounded whitespace-pre-wrap text-gray-700">
-            {caseData.consultation_notes}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-500">담당 직원 배정</label>
+              <p className="text-gray-700">{staffName}</p>
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* 상태 변환 */}
-      <div className="bg-white p-6 rounded-lg border shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">상태 변환</h2>
-        <CaseStatusForm caseId={caseData.id} currentStatus={caseData.status} />
-      </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-500">상담 내용 (Consultation Notes)</label>
+            <div className="bg-gray-50 p-3 rounded min-h-24 whitespace-pre-wrap text-gray-700">
+              {caseData.consultation_notes || '(없음)'}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-500">사건 개요 (Description)</label>
+            <div className="bg-gray-50 p-3 rounded min-h-24 whitespace-pre-wrap text-gray-700">
+              {caseData.description || '(없음)'}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-500">상태</label>
+            <div>
+              <StatusBadge status={caseData.status} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 3. 상태 변환 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>상태 변환</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CaseStatusForm caseId={caseData.id} currentStatus={caseData.status} />
+        </CardContent>
+      </Card>
 
       {/* 메타 정보 */}
       <div className="text-xs text-gray-500 space-y-1">

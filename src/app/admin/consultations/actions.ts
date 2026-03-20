@@ -109,7 +109,7 @@ export async function convertConsultationToCase(consultationId: string) {
     .from('cases')
     .insert({
       id: caseId,
-      title: `[상담] ${consultation.customer_name}`,
+      title: consultation.customer_name,
       description: consultation.content,
       consultation_notes: consultation.notes || null,
       fee_amount: null,
