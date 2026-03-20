@@ -236,8 +236,8 @@ export async function ReportsPanel({ caseId }: { caseId: string }) {
                     </div>
                   )}
 
-                  {/* 사진 */}
-                  {report.media_url && report.report_type === 'photo' && (
+                  {/* 사진 (photo 타입 또는 route에 첨부된 사진) */}
+                  {report.media_url && (report.report_type === 'photo' || report.report_type === 'route') && (
                     <img
                       src={report.media_url}
                       alt="현장 사진"

@@ -28,7 +28,7 @@ interface RouteTrackingContextValue {
   totalKm: number
   startTracking: (caseId: string, staffId: string, caseTitle: string) => Promise<void>
   requestStop: () => void
-  submitTracking: () => Promise<void>
+  submitTracking: (note?: string, mediaUrl?: string) => Promise<void>
   cancelTracking: () => Promise<void>
 }
 
@@ -39,7 +39,7 @@ const RouteTrackingContext = createContext<RouteTrackingContextValue>({
   totalKm: 0,
   startTracking: async () => {},
   requestStop: () => {},
-  submitTracking: async () => {},
+  submitTracking: async (_note?: string, _mediaUrl?: string) => {},
   cancelTracking: async () => {},
 })
 
@@ -167,13 +167,14 @@ export function RouteTrackingProvider({ children }: { children: React.ReactNode 
     setStatus('confirming')
   }, [stopWatch])
 
-  const submitTracking = useCallback(async () => {
+  const submitTracking = useCallback(async (note?: string, mediaUrl?: string) => {
     const sess = sessionRef.current
     if (!sess) return
     await flushPoints()
     const mins = Math.round((Date.now() - sess.startTime) / 60000)
-    const summary = `동선 추적 완료 — ${pointCountRef.current}개 위치, ${totalKmRef.current.toFixed(2)}km, 약 ${mins}분`
-    await endRouteReport(sess.reportId, pointCountRef.current, totalKmRef.current, summary)
+    const base = `동선 추적 완료 — ${pointCountRef.current}개 위치, ${totalKmRef.current.toFixed(2)}km, 약 ${mins}분`
+    const summary = note?.trim() ? `${base}\n${note.trim()}` : base
+    await endRouteReport(sess.reportId, pointCountRef.current, totalKmRef.current, summary, mediaUrl)
     localStorage.removeItem(STORAGE_KEY)
     pendingRef.current = []
     lastPointRef.current = null

@@ -94,7 +94,8 @@ export async function endRouteReport(
   reportId: string,
   totalPoints: number,
   distanceKm: number,
-  summary: string
+  summary: string,
+  mediaUrl?: string
 ) {
   const supabase = createDatabaseClient()
 
@@ -105,6 +106,7 @@ export async function endRouteReport(
       total_points: totalPoints,
       distance_km: distanceKm,
       is_live: false,
+      ...(mediaUrl ? { media_url: mediaUrl } : {}),
     })
     .eq('id', reportId)
 
