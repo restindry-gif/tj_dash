@@ -38,18 +38,16 @@ export function CaseStatusForm({
       </p>
 
       <div className="flex flex-wrap gap-2">
-        {statusOptions
-          .filter((option) => option.value !== currentStatus)
-          .map((option) => (
-            <button
-              key={option.value}
-              onClick={() => handleStatusChange(option.value)}
-              disabled={isLoading}
-              className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-opacity ${option.color} hover:opacity-90 disabled:opacity-50`}
-            >
-              {isLoading ? '...' : option.label}
-            </button>
-          ))}
+        {statusOptions.map((option) => (
+          <button
+            key={option.value}
+            onClick={() => handleStatusChange(option.value)}
+            disabled={isLoading || option.value === currentStatus}
+            className={`px-4 py-2 rounded-lg text-white text-sm font-medium transition-opacity ${option.color} hover:opacity-90 disabled:opacity-40`}
+          >
+            {isLoading ? '...' : option.label}
+          </button>
+        ))}
       </div>
 
       <p className="text-xs text-slate-500">
