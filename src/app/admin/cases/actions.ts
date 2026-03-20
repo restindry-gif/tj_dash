@@ -24,12 +24,11 @@ export async function createCase(formData: FormData) {
       const authUser = await createAuthUser(email, password, 'customer')
       authUserId = authUser.id
     } catch {
-      // Email already registered — find existing auth user
-      const existing = await getAuthUserByEmail(email)
-      if (existing) {
-        authUserId = existing.id
-      } else {
-        // Fallback: create profile without auth (password reset in customer mgmt)
+      // Email already registered or auth error — try to find existing
+      try {
+        const existing = await getAuthUserByEmail(email)
+        authUserId = existing?.id ?? crypto.randomUUID()
+      } catch {
         authUserId = crypto.randomUUID()
       }
     }

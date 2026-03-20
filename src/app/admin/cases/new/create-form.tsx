@@ -49,7 +49,15 @@ export function CreateCaseForm({
     <form
       action={async (formData) => {
         setIsSubmitting(true)
-        await createCase(formData)
+        try {
+          await createCase(formData)
+        } catch (err: unknown) {
+          const digest = err && typeof err === 'object' && 'digest' in err
+            ? String((err as { digest: unknown }).digest) : ''
+          if (!digest.startsWith('NEXT_REDIRECT')) {
+            console.error('사건 등록 오류:', err)
+          }
+        }
         setIsSubmitting(false)
       }}
       className="space-y-6 max-w-3xl"
