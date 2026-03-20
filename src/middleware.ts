@@ -10,7 +10,6 @@ export async function middleware(request: NextRequest) {
     '/',
     '/auth/login',
     '/auth/setup',
-    '/customer/page',
   ]
 
   if (publicRoutes.includes(pathname)) {

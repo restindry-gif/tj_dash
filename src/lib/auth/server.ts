@@ -64,6 +64,19 @@ export async function deleteAuthUser(userId: string) {
 }
 
 /**
+ * Update user role in auth metadata
+ */
+export async function updateAuthUserRole(userId: string, role: 'admin' | 'staff' | 'customer') {
+  const supabase = createServiceRoleClient()
+  const { error } = await supabase.auth.admin.updateUserById(userId, {
+    user_metadata: { role },
+  })
+  if (error) {
+    throw new Error(`Failed to update user role: ${error.message}`)
+  }
+}
+
+/**
  * Update user password
  * @param userId - User ID
  * @param password - New password

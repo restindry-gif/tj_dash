@@ -1,7 +1,7 @@
 'use server'
 
 import { createDatabaseClient } from '@/lib/supabase/client'
-import { createAuthUser, deleteAuthUser, updateAuthUserPassword } from '@/lib/auth/server'
+import { createAuthUser, deleteAuthUser, updateAuthUserPassword, updateAuthUserRole } from '@/lib/auth/server'
 import { getCurrentUser } from '@/lib/auth/session'
 import { revalidatePath } from 'next/cache'
 
@@ -85,7 +85,7 @@ export async function updateStaff(formData: FormData) {
 export async function deleteStaff(staffId: string) {
   try {
     const currentUser = await getCurrentUser()
-    if (currentUser?.role !== 'admin') {
+    if (!currentUser || currentUser.role !== 'admin') {
       throw new Error('관리자만 직원을 삭제할 수 있습니다.')
     }
     if (currentUser.id === staffId) {
@@ -124,7 +124,7 @@ export async function updateStaffRole(
 ) {
   try {
     const currentUser = await getCurrentUser()
-    if (currentUser?.role !== 'admin') {
+    if (!currentUser || currentUser.role !== 'admin') {
       throw new Error('관리자만 권한을 변경할 수 있습니다.')
     }
 
@@ -138,15 +138,7 @@ export async function updateStaffRole(
     if (error) throw new Error(`권한 변경 실패: ${error.message}`)
 
     // 2. auth.users user_metadata 업데이트
-    const { createClient } = await import('@supabase/supabase-js')
-    const adminClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-    await adminClient.auth.admin.updateUserById(staffId, {
-      user_metadata: { role: newRole }
-    })
+    await updateAuthUserRole(staffId, newRole)
 
     revalidatePath('/admin/staff')
     return { success: true }

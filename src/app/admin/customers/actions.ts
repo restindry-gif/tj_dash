@@ -72,13 +72,15 @@ export async function resetCustomerPassword(id: string, newPassword: string): Pr
 
     // If auth user ID differs from profile ID, migrate references
     if (authUserId !== id) {
-      await supabase.from('profiles').insert({
+      const { error: insertError } = await supabase.from('profiles').insert({
         id: authUserId,
         email: profile.email,
         full_name: profile.full_name,
         phone: profile.phone,
         role: profile.role,
       })
+      if (insertError) return { error: `프로필 마이그레이션 실패: ${insertError.message}` }
+
       await supabase.from('cases').update({ client_id: authUserId }).eq('client_id', id)
       await supabase.from('profiles').delete().eq('id', id)
     }

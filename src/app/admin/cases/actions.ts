@@ -77,7 +77,7 @@ export async function createCase(formData: FormData): Promise<{ error: string } 
     })
 
   if (caseError) {
-    console.error('Error creating case:', caseError)
+    return { error: `사건 등록 실패: ${caseError.message}` }
   }
 
   revalidatePath('/admin')
