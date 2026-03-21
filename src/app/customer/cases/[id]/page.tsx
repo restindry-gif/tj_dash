@@ -77,6 +77,7 @@ export default async function CustomerCaseDetailPage({
     .select('*, profiles(full_name)')
     .eq('case_id', id)
     .eq('is_live', false)
+    .eq('is_shared_with_customer', true)
     .order('created_at', { ascending: false })
 
   // 동선 보고의 GPS 포인트 일괄 로딩
