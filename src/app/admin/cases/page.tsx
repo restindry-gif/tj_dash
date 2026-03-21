@@ -24,6 +24,7 @@ export default async function AdminCasesPage() {
   const { data: cases } = await supabase
     .from('cases')
     .select('*')
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
   const total = cases?.length ?? 0

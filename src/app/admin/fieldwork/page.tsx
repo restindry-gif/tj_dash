@@ -31,6 +31,7 @@ export default async function AdminFieldworkPage() {
   const { data: cases } = await supabase
     .from('cases')
     .select('id, title, status, created_at, assigned_staff_id')
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
   // 배정된 직원 이름 조회

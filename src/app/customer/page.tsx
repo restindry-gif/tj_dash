@@ -23,6 +23,7 @@ export default async function CustomerDashboard() {
     .from('cases')
     .select('id, title, status, created_at')
     .eq('client_id', user.id)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
   return (

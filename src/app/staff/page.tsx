@@ -28,6 +28,7 @@ export default async function StaffDashboard() {
     .from('cases')
     .select('id, title, status, created_at')
     .eq('assigned_staff_id', user.id)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
   const activeCases = cases?.filter((c) => c.status === 'active') || []

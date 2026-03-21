@@ -11,6 +11,7 @@ export default async function AdminPage() {
   const { data: cases, error } = await supabase
     .from('cases')
     .select('*')
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
   if (error) {

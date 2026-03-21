@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CaseStatusForm } from './status-form'
 import { AssignStaffForm } from './assign-staff-form'
 import { CaseInfoForm } from './case-info-form'
+import { DeleteCaseButton } from './delete-case-button'
 import { ReportsPanel } from './reports-panel'
 import { formatDateTime } from '@/lib/date'
 
@@ -49,10 +50,11 @@ export default async function CaseDetailPage({
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <Link href="/admin" className="text-slate-400 hover:text-slate-300 text-sm transition-colors">
-          ← 대시보드로
+      <div className="flex items-center justify-between gap-3">
+        <Link href="/admin/cases" className="text-slate-400 hover:text-slate-300 text-sm transition-colors">
+          ← 사건 목록
         </Link>
+        <DeleteCaseButton caseId={id} />
       </div>
 
       <h1 className="text-2xl font-bold text-slate-50">사건 상세</h1>

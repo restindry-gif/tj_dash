@@ -143,6 +143,77 @@ export async function updateCaseAssignedStaff(
 }
 
 /**
+ * Soft-delete a case (move to trash)
+ */
+export async function deleteCase(caseId: string): Promise<{ error?: string }> {
+  try {
+    const user = await requireAdmin()
+    const supabase = createDatabaseClient()
+    const { error } = await supabase
+      .from('cases')
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user.id })
+      .eq('id', caseId)
+    if (error) return { error: error.message }
+    revalidatePath('/admin')
+    revalidatePath('/admin/cases')
+    revalidatePath('/admin/trash')
+    return {}
+  } catch (err) {
+    return { error: (err as Error).message }
+  }
+}
+
+/**
+ * Restore a soft-deleted case
+ */
+export async function restoreCase(caseId: string): Promise<{ error?: string }> {
+  try {
+    await requireAdmin()
+    const supabase = createDatabaseClient()
+    const { error } = await supabase
+      .from('cases')
+      .update({ deleted_at: null, deleted_by: null })
+      .eq('id', caseId)
+    if (error) return { error: error.message }
+    revalidatePath('/admin')
+    revalidatePath('/admin/cases')
+    revalidatePath('/admin/trash')
+    return {}
+  } catch (err) {
+    return { error: (err as Error).message }
+  }
+}
+
+/**
+ * Permanently delete a case
+ */
+export async function permanentDeleteCase(caseId: string): Promise<{ error?: string }> {
+  try {
+    await requireAdmin()
+    const supabase = createDatabaseClient()
+    const { error } = await supabase.from('cases').delete().eq('id', caseId)
+    if (error) return { error: error.message }
+    revalidatePath('/admin/trash')
+    return {}
+  } catch (err) {
+    return { error: (err as Error).message }
+  }
+}
+
+/**
+ * Auto-purge cases deleted more than 3 days ago
+ */
+export async function purgeExpiredCases(): Promise<void> {
+  const supabase = createDatabaseClient()
+  const cutoff = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+  await supabase
+    .from('cases')
+    .delete()
+    .not('deleted_at', 'is', null)
+    .lt('deleted_at', cutoff)
+}
+
+/**
  * Update case basic info (title, consultation_notes, description)
  */
 export async function updateCaseInfo(
