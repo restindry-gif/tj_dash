@@ -183,7 +183,7 @@ export default async function CustomerCaseDetailPage({
                   </div>
 
                   {/* 바디 */}
-                  <div className="px-4 py-3 space-y-3 pb-0">
+                  <div className="px-4 pt-3 pb-4 space-y-3">
                     {/* 동선 통계 */}
                     {report.report_type === 'route' && (report.total_points || report.distance_km) && (
                       <div className="grid grid-cols-2 gap-2">

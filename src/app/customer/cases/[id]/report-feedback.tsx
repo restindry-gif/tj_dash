@@ -37,7 +37,7 @@ export function ReportFeedback({
   }
 
   return (
-    <div className="border-t border-slate-700/40 mt-4 pt-4 space-y-4">
+    <div className="border-t border-slate-700/40 mt-3 pt-4 space-y-4">
       {/* 확인 체크 */}
       <button
         onClick={handleCheck}
