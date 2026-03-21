@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createStaff } from './actions'
+import { PhoneInput } from '@/components/phone-input'
 
 export function StaffForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -82,7 +83,7 @@ export function StaffForm() {
 
       <div>
         <label className="text-sm font-medium text-slate-400 mb-1.5 block">전화번호</label>
-        <input
+        <PhoneInput
           name="phone"
           placeholder="010-0000-0000"
           className="w-full bg-slate-800 border border-slate-700 text-slate-50 placeholder:text-slate-500 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-green-500/50 focus:border-green-500 outline-none transition-colors"

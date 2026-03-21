@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { updateCustomer, deleteCustomer, resetCustomerPassword } from '../actions'
 import { useRouter } from 'next/navigation'
+import { PhoneInput, formatPhoneNumber } from '@/components/phone-input'
 
 interface CustomerProfile {
   id: string
@@ -20,7 +21,7 @@ export function CustomerEditForm({ customer }: { customer: CustomerProfile }) {
 
   const [fullName, setFullName] = useState(customer.full_name ?? '')
   const [email, setEmail] = useState(customer.email ?? '')
-  const [phone, setPhone] = useState(customer.phone ?? '')
+  const [phone, setPhone] = useState(formatPhoneNumber(customer.phone ?? ''))
   const [notes, setNotes] = useState(customer.notes ?? '')
   const [newPassword, setNewPassword] = useState('')
   const [msg, setMsg] = useState('')
@@ -87,10 +88,9 @@ export function CustomerEditForm({ customer }: { customer: CustomerProfile }) {
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-slate-500">연락처</label>
-            <input
+            <PhoneInput
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              type="tel"
+              onChange={setPhone}
               className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
               placeholder="010-0000-0000"
             />

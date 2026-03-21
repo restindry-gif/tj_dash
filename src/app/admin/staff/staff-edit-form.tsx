@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateStaff, deleteStaff, updateStaffRole } from './actions'
+import { PhoneInput } from '@/components/phone-input'
 
 type Staff = {
   id: string
@@ -94,7 +95,7 @@ export function StaffEditForm({ staff }: { staff: Staff }) {
         </div>
         <div>
           <label className="text-xs text-slate-500 mb-1 block">전화번호</label>
-          <input
+          <PhoneInput
             name="phone"
             defaultValue={staff.phone || ''}
             className="w-full bg-slate-800 border border-slate-700 text-slate-50 placeholder:text-slate-500 rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-green-500/50 focus:border-green-500 outline-none transition-colors"
