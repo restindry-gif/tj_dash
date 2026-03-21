@@ -301,7 +301,9 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
                     e.stopPropagation()
                     handleToggleStar(caseItem.id, caseItem.is_starred)
                   }}
-                  className="text-lg mt-0.5 hover:scale-110 transition-transform shrink-0"
+                  className={`text-lg mt-0.5 hover:scale-110 transition-transform shrink-0 ${
+                    caseItem.is_starred ? '' : 'text-slate-400'
+                  }`}
                 >
                   {caseItem.is_starred ? '⭐' : '☆'}
                 </button>
