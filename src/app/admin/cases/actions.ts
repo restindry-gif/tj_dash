@@ -400,7 +400,7 @@ export async function searchCases(params: SearchParams) {
 
   let query = supabase
     .from('cases')
-    .select('*, profiles!assigned_staff_id(full_name)')
+    .select('id, title, status, created_at, is_starred, client_id, assigned_staff_id, description, consultation_notes, deleted_at, profiles!assigned_staff_id(full_name)')
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
@@ -446,8 +446,10 @@ export async function searchCases(params: SearchParams) {
   const { data, error } = await query
 
   if (error) {
-    console.error('searchCases error:', error)
-    throw new Error(`Failed to search cases: ${error.message}`)
+    console.error('searchCases error:', JSON.stringify(error, null, 2))
+    console.error('Error code:', (error as any).code)
+    console.error('Error status:', (error as any).status)
+    throw new Error(`Failed to search cases: ${JSON.stringify(error)}`)
   }
 
   return data || []
