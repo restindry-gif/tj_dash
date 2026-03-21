@@ -47,7 +47,7 @@ export function RouteMap({ points, startMeta, endMeta, className = '' }: RouteMa
   const center = points[Math.floor(points.length / 2)]
 
   return (
-    <div className={`rounded-xl overflow-hidden border border-slate-700 ${className}`}>
+    <div style={{ isolation: 'isolate' }} className={`rounded-xl overflow-hidden border border-slate-700 ${className}`}>
       <MapContainer
         center={center}
         zoom={14}
