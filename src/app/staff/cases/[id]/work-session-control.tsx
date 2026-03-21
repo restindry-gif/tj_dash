@@ -180,7 +180,7 @@ export function WorkSessionControl({ caseId, staffId, caseTitle }: Props) {
       <div className="space-y-3">
         {/* 결과 요약 */}
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 space-y-3">
-          <p className="text-xs text-slate-500 uppercase tracking-wider">업무 종료 — 보고 작성</p>
+          <p className="text-xs text-slate-500 uppercase tracking-wider">추적 종료 — 보고 작성</p>
           <div className="grid grid-cols-2 gap-3">
             <div className="text-center bg-slate-700/40 rounded-lg py-2.5">
               <p className="text-xl font-bold text-slate-50 tabular-nums">{pointCount}</p>

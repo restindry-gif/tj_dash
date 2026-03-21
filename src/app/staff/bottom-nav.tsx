@@ -26,7 +26,7 @@ export function StaffBottomNav({ userEmail }: StaffBottomNavProps) {
         >
           <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse shrink-0" />
           <span className="text-orange-400 text-xs font-medium flex-1 truncate">
-            {status === 'confirming' ? '업무 종료 확인 필요' : '업무 중 — 동선 추적 중'}
+            {status === 'confirming' ? '추적 종료 확인' : '업무 중 — 동선 추적 중'}
           </span>
           <span className="text-slate-500 text-xs truncate max-w-[120px]">{session.caseTitle}</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 shrink-0">
