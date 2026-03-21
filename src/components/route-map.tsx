@@ -81,41 +81,50 @@ export function RouteMap({ points, startMeta, endMeta, className = '' }: RouteMa
       </MapContainer>
 
       {/* 범례 */}
-      <div className="bg-slate-800 px-4 py-2.5 flex flex-col gap-1.5 text-xs border-t border-slate-700/50">
+      <div className="bg-slate-800 px-4 py-3 flex flex-col gap-2 text-xs border-t border-slate-700/50">
 
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="w-3 h-3 rounded-full bg-green-500 shrink-0" />
-          <span className="text-slate-300 font-medium shrink-0">출발</span>
-          {startMeta && (
-            <>
-              <span className="text-slate-600 shrink-0">·</span>
-              <span className="text-slate-400 truncate">{startMeta.address}</span>
-              <span className="text-slate-600 shrink-0">·</span>
-              <span className="text-slate-500 tabular-nums shrink-0">{startMeta.time}</span>
-            </>
-          )}
-        </div>
-        {points.length > 1 && (
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-3 h-3 rounded-full bg-orange-500 shrink-0" />
-            <span className="text-slate-300 font-medium shrink-0">도착</span>
-            {endMeta && (
-              <>
-                <span className="text-slate-600 shrink-0">·</span>
-                <span className="text-slate-400 truncate">{endMeta.address}</span>
-                <span className="text-slate-600 shrink-0">·</span>
-                <span className="text-slate-500 tabular-nums shrink-0">{endMeta.time}</span>
-              </>
+        {/* 출발 */}
+        <div className="flex items-start gap-2">
+          <span className="w-3 h-3 rounded-full bg-green-500 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-300 font-medium">출발</span>
+              {startMeta && (
+                <span className="text-slate-400">{startMeta.address}</span>
+              )}
+            </div>
+            {startMeta && (
+              <p className="text-slate-500 tabular-nums mt-0.5">{startMeta.time}</p>
             )}
           </div>
+        </div>
+
+        {/* 도착 */}
+        {points.length > 1 && (
+          <div className="flex items-start gap-2">
+            <span className="w-3 h-3 rounded-full bg-orange-500 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-300 font-medium">도착</span>
+                {endMeta && (
+                  <span className="text-slate-400">{endMeta.address}</span>
+                )}
+              </div>
+              {endMeta && (
+                <p className="text-slate-500 tabular-nums mt-0.5">{endMeta.time}</p>
+              )}
+            </div>
+          </div>
         )}
+
         {points.length === 1 && (
           <div className="flex items-center gap-2">
             <span className="w-8 h-0.5 bg-orange-400 shrink-0 rounded" />
             <span className="text-slate-500">경로</span>
           </div>
         )}
-        <p className="text-[10px] text-slate-600 pt-0.5">
+
+        <p className="text-[10px] text-slate-600 pt-0.5 leading-relaxed">
           GPS는 오차가 있을 수 있습니다. 출발·도착·동선은 대략적인 정보로 참고해 주세요.
         </p>
       </div>
