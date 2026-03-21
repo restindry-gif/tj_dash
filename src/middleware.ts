@@ -38,26 +38,17 @@ export async function middleware(request: NextRequest) {
   const unauthorized = (from: string) =>
     NextResponse.redirect(new URL(`/unauthorized?from=${encodeURIComponent(from)}`, request.url))
 
-  // /admin — admin, staff only
+  // /admin — admin only
   if (pathname.startsWith('/admin')) {
     if (!session) return NextResponse.redirect(new URL('/auth/login', request.url))
-    if (role !== 'admin' && role !== 'staff') return unauthorized(pathname)
-
-    // /admin/customers, /admin/staff — admin only
-    if (
-      (pathname.startsWith('/admin/staff') || pathname.startsWith('/admin/customers')) &&
-      role !== 'admin'
-    ) {
-      return unauthorized(pathname)
-    }
-
+    if (role !== 'admin') return unauthorized(pathname)
     return response
   }
 
-  // /staff — admin, staff only
+  // /staff — staff only (admin은 /admin 사용)
   if (pathname.startsWith('/staff')) {
     if (!session) return NextResponse.redirect(new URL('/auth/login', request.url))
-    if (role !== 'staff' && role !== 'admin') return unauthorized(pathname)
+    if (role !== 'staff') return unauthorized(pathname)
     return response
   }
 
