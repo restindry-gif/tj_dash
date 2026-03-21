@@ -41,14 +41,60 @@ const TYPE_CONFIG: Record<string, {
   },
 }
 
-async function getRouteTrackPoints(sessionId: string): Promise<TrackPoint[]> {
+interface PointMeta { time: string; address: string }
+interface RouteData {
+  tracks: TrackPoint[]
+  startMeta?: PointMeta
+  endMeta?: PointMeta
+}
+
+async function reverseGeocode(lat: number, lng: number): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ko`,
+      { headers: { 'User-Agent': 'TJ-Dash/1.0' }, next: { revalidate: 86400 } }
+    )
+    const data = await res.json()
+    const addr = data.address ?? {}
+    return (
+      [addr.borough ?? addr.county, addr.suburb ?? addr.neighbourhood]
+        .filter(Boolean)
+        .join(' ') || '위치 정보 없음'
+    )
+  } catch {
+    return '위치 정보 없음'
+  }
+}
+
+async function getRouteData(sessionId: string): Promise<RouteData> {
   const supabase = createDatabaseClient()
   const { data } = await supabase
     .from('location_tracks')
     .select('lat, lng, accuracy, recorded_at')
     .eq('session_id', sessionId)
     .order('recorded_at', { ascending: true })
-  return (data as TrackPoint[] | null) ?? []
+  const tracks = (data as TrackPoint[] | null) ?? []
+  if (tracks.length === 0) return { tracks }
+  const first = tracks[0]
+  const last = tracks[tracks.length - 1]
+  const isMulti = tracks.length > 1
+  const [startAddr, endAddr] = await Promise.all([
+    reverseGeocode(first.lat, first.lng),
+    isMulti ? reverseGeocode(last.lat, last.lng) : Promise.resolve(''),
+  ])
+  return {
+    tracks,
+    startMeta: {
+      time: formatDateTime(first.recorded_at, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      address: startAddr,
+    },
+    endMeta: isMulti
+      ? {
+          time: formatDateTime(last.recorded_at, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          address: endAddr,
+        }
+      : undefined,
+  }
 }
 
 export default async function CustomerCaseDetailPage({
@@ -80,16 +126,12 @@ export default async function CustomerCaseDetailPage({
     .eq('is_shared_with_customer', true)
     .order('created_at', { ascending: false })
 
-  // 동선 보고의 GPS 포인트 일괄 로딩
-  const routePointsMap: Record<string, TrackPoint[]> = {}
+  // 동선 보고의 GPS 포인트 + 메타 일괄 로딩
+  const routeDataMap: Record<string, RouteData> = {}
   if (reports) {
-    await Promise.all(
-      reports
-        .filter((r) => r.report_type === 'route' && r.session_id)
-        .map(async (r) => {
-          routePointsMap[r.id] = await getRouteTrackPoints(r.session_id!)
-        })
-    )
+    const routeReports = reports.filter((r) => r.report_type === 'route' && r.session_id)
+    const results = await Promise.all(routeReports.map((r) => getRouteData(r.session_id!)))
+    routeReports.forEach((r, i) => { routeDataMap[r.id] = results[i] })
   }
 
   const st = STATUS_CONFIG[caseData.status] ?? { label: caseData.status, color: 'bg-slate-700/50 text-slate-400 border-slate-600/30' }
@@ -153,7 +195,8 @@ export default async function CustomerCaseDetailPage({
           <div className="space-y-2.5">
             {reports.map((report) => {
               const cfg = TYPE_CONFIG[report.report_type] ?? TYPE_CONFIG.text
-              const trackPoints = routePointsMap[report.id] ?? []
+              const rd = routeDataMap[report.id]
+              const trackPoints = rd?.tracks ?? []
               const mapPoints: [number, number][] = trackPoints.map((p) => [p.lat, p.lng])
               const memo = report.report_type === 'route' && report.content
                 ? report.content.split('\n').slice(1).join('\n').trim()
@@ -207,7 +250,7 @@ export default async function CustomerCaseDetailPage({
                     {/* 동선 지도 */}
                     {report.report_type === 'route' && mapPoints.length > 0 && (
                       <div className="rounded-lg overflow-hidden border border-slate-700/40">
-                        <RouteMapDynamic points={mapPoints} />
+                        <RouteMapDynamic points={mapPoints} startMeta={rd?.startMeta} endMeta={rd?.endMeta} />
                       </div>
                     )}
 

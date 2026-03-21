@@ -17,8 +17,15 @@ const endIcon = L.divIcon({
   iconAnchor: [7, 7],
 })
 
+interface PointMeta {
+  time: string
+  address: string
+}
+
 interface RouteMapProps {
   points: [number, number][]
+  startMeta?: PointMeta
+  endMeta?: PointMeta
   className?: string
 }
 
@@ -34,7 +41,7 @@ function FitBounds({ points }: { points: [number, number][] }) {
   return null
 }
 
-export function RouteMap({ points, className = '' }: RouteMapProps) {
+export function RouteMap({ points, startMeta, endMeta, className = '' }: RouteMapProps) {
   if (points.length === 0) return null
 
   const center = points[Math.floor(points.length / 2)]
@@ -62,28 +69,51 @@ export function RouteMap({ points, className = '' }: RouteMapProps) {
 
         {/* 출발점 */}
         <Marker position={points[0]} icon={startIcon}>
-          <Popup>출발</Popup>
+          <Popup>출발{startMeta ? `\n${startMeta.address}` : ''}</Popup>
         </Marker>
 
         {/* 도착점 (출발과 다를 때만) */}
         {points.length > 1 && (
           <Marker position={points[points.length - 1]} icon={endIcon}>
-            <Popup>도착</Popup>
+            <Popup>도착{endMeta ? `\n${endMeta.address}` : ''}</Popup>
           </Marker>
         )}
       </MapContainer>
 
       {/* 범례 */}
-      <div className="bg-slate-800 px-4 py-2 flex items-center gap-4 text-xs text-slate-400">
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-green-500 shrink-0" /> 출발
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-8 h-0.5 bg-orange-400 shrink-0 rounded" /> 경로
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-orange-500 shrink-0" /> 도착
-        </span>
+      <div className="bg-slate-800 px-4 py-2.5 flex flex-col gap-1.5 text-xs border-t border-slate-700/50">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-3 h-3 rounded-full bg-green-500 shrink-0" />
+          <span className="text-slate-300 font-medium shrink-0">출발</span>
+          {startMeta && (
+            <>
+              <span className="text-slate-600 shrink-0">·</span>
+              <span className="text-slate-400 truncate">{startMeta.address}</span>
+              <span className="text-slate-600 shrink-0">·</span>
+              <span className="text-slate-500 tabular-nums shrink-0">{startMeta.time}</span>
+            </>
+          )}
+        </div>
+        {points.length > 1 && (
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-3 h-3 rounded-full bg-orange-500 shrink-0" />
+            <span className="text-slate-300 font-medium shrink-0">도착</span>
+            {endMeta && (
+              <>
+                <span className="text-slate-600 shrink-0">·</span>
+                <span className="text-slate-400 truncate">{endMeta.address}</span>
+                <span className="text-slate-600 shrink-0">·</span>
+                <span className="text-slate-500 tabular-nums shrink-0">{endMeta.time}</span>
+              </>
+            )}
+          </div>
+        )}
+        {points.length === 1 && (
+          <div className="flex items-center gap-2">
+            <span className="w-8 h-0.5 bg-orange-400 shrink-0 rounded" />
+            <span className="text-slate-500">경로</span>
+          </div>
+        )}
       </div>
     </div>
   )

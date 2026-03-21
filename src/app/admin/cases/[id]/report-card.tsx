@@ -51,15 +51,21 @@ const TYPE_CONFIG: Record<string, {
   },
 }
 
+interface PointMeta { time: string; address: string }
+
 export function ReportCard({
   report,
   caseId,
   routePts,
+  routeStartMeta,
+  routeEndMeta,
   isAdmin = false,
 }: {
   report: Report
   caseId: string
   routePts?: [number, number][]
+  routeStartMeta?: PointMeta
+  routeEndMeta?: PointMeta
   isAdmin?: boolean
 }) {
   const [isPending, startTransition] = useTransition()
@@ -248,7 +254,7 @@ export function ReportCard({
         {report.report_type === 'route' && (
           routePts && routePts.length > 0 ? (
             <div className="rounded-lg overflow-hidden border border-slate-700/40">
-              <RouteMapDynamic points={routePts} />
+              <RouteMapDynamic points={routePts} startMeta={routeStartMeta} endMeta={routeEndMeta} />
             </div>
           ) : (
             <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2.5 border border-slate-700/30">

@@ -2,8 +2,11 @@
 
 import { useState, useTransition } from 'react'
 import { CopyLinkButton } from '@/components/copy-link-button'
+import { RouteMapDynamic } from '@/components/route-map-wrapper'
 import { formatDateTime } from '@/lib/date'
 import { toggleReportShare } from '@/app/admin/cases/actions'
+
+interface PointMeta { time: string; address: string }
 
 interface CaseReport {
   id: string
@@ -18,6 +21,9 @@ interface CaseReport {
   original_requested: boolean | null
   client_checked: boolean | null
   client_comment: string | null
+  session_id: string | null
+  total_points: number | null
+  distance_km: number | null
   created_at: string
 }
 
@@ -59,11 +65,26 @@ const REPORT_TYPE_CONFIG: Record<string, { label: string; accent: string; badge:
   },
 }
 
-export function ReportItem({ report, caseId }: { report: CaseReport; caseId: string }) {
+export function ReportItem({
+  report,
+  caseId,
+  routePts,
+  routeStartMeta,
+  routeEndMeta,
+}: {
+  report: CaseReport
+  caseId: string
+  routePts?: [number, number][]
+  routeStartMeta?: PointMeta
+  routeEndMeta?: PointMeta
+}) {
   const [isPending, startTransition] = useTransition()
   const [isShared, setIsShared] = useState(report.is_shared_with_customer)
   const cfg = REPORT_TYPE_CONFIG[report.report_type] ?? REPORT_TYPE_CONFIG.text
   const hasBadges = report.is_live || report.original_requested || report.client_checked
+  const memo = report.report_type === 'route' && report.content
+    ? report.content.split('\n').slice(1).join('\n').trim()
+    : null
 
   const handleToggleShare = () => {
     const newState = !isShared
@@ -164,9 +185,52 @@ export function ReportItem({ report, caseId }: { report: CaseReport; caseId: str
 
       {/* 바디 — 미공유 시 opacity 낮춤 */}
       <div className={`px-4 py-3 space-y-2.5 ${!isShared ? 'opacity-55' : ''}`}>
-        {report.content && (
+
+        {/* 동선 통계 */}
+        {report.report_type === 'route' && (report.total_points || report.distance_km) && (
+          <div className="grid grid-cols-2 gap-2">
+            {report.total_points != null && (
+              <div className="bg-slate-900/80 rounded-lg p-3 text-center border border-slate-700/40">
+                <p className="text-base font-bold text-slate-50 tabular-nums">{report.total_points}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">기록된 위치</p>
+              </div>
+            )}
+            {report.distance_km != null && (
+              <div className="bg-slate-900/80 rounded-lg p-3 text-center border border-slate-700/40">
+                <p className="text-base font-bold text-slate-50 tabular-nums">{Number(report.distance_km).toFixed(2)} km</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">이동거리</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 동선 지도 */}
+        {report.report_type === 'route' && (
+          routePts && routePts.length > 0 ? (
+            <div className="rounded-lg overflow-hidden border border-slate-700/40">
+              <RouteMapDynamic points={routePts} startMeta={routeStartMeta} endMeta={routeEndMeta} />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2.5 border border-slate-700/30">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 shrink-0">
+                <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+              </svg>
+              <p className="text-xs text-slate-500">GPS 포인트 없음</p>
+            </div>
+          )
+        )}
+
+        {/* 동선 메모 (첫 줄 제외) */}
+        {memo && (
+          <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap bg-slate-900/60 rounded-lg px-3 py-2.5 border border-slate-700/30">{memo}</p>
+        )}
+
+        {/* 일반 텍스트 */}
+        {report.content && report.report_type !== 'route' && (
           <p className="text-slate-200 text-sm whitespace-pre-wrap leading-relaxed">{report.content}</p>
         )}
+
+        {/* 주소 */}
         {report.address && (
           <div className="flex items-start gap-2 bg-blue-500/5 border border-blue-500/15 rounded-lg px-3 py-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 mt-0.5 shrink-0">
@@ -181,9 +245,21 @@ export function ReportItem({ report, caseId }: { report: CaseReport; caseId: str
             </div>
           </div>
         )}
-        {report.media_url && (
+
+        {/* 사진 */}
+        {report.media_url && report.report_type !== 'voice' && (
           <img src={report.media_url} alt="현장 사진" className="w-full rounded-lg max-h-56 object-cover border border-slate-700/40" />
         )}
+
+        {/* 음성 */}
+        {report.media_url && report.report_type === 'voice' && (
+          <div className="bg-slate-900/70 rounded-lg px-3 py-3 border border-slate-700/30 space-y-1.5">
+            <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wide">음성 파일</p>
+            <audio controls src={report.media_url} className="w-full h-10" />
+          </div>
+        )}
+
+        {/* 의뢰인 코멘트 */}
         {report.client_comment && (
           <div className="flex items-start gap-2.5 bg-emerald-500/5 border border-emerald-500/20 rounded-lg px-3 py-2.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400 mt-0.5 shrink-0">
