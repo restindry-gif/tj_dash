@@ -154,3 +154,48 @@ export async function updateCaseFees(
   revalidatePath(`/admin/cases/${caseId}`)
   return { success: true }
 }
+
+/**
+ * Toggle report sharing status with customer
+ */
+export async function toggleReportShare(
+  reportId: string,
+  caseId: string,
+  shouldShare: boolean
+): Promise<{ error?: string }> {
+  try {
+    const supabase = createDatabaseClient()
+
+    // Verify report belongs to this case
+    const { data: report, error: fetchError } = await supabase
+      .from('case_reports')
+      .select('id, case_id')
+      .eq('id', reportId)
+      .eq('case_id', caseId)
+      .single()
+
+    if (fetchError || !report) {
+      return { error: 'Report not found' }
+    }
+
+    // Toggle share status
+    const { error: updateError } = await supabase
+      .from('case_reports')
+      .update({ is_shared_with_customer: shouldShare })
+      .eq('id', reportId)
+      .eq('case_id', caseId)
+
+    if (updateError) {
+      console.error('Toggle share error:', updateError)
+      return { error: 'Failed to update share status' }
+    }
+
+    // Revalidate customer case page to reflect changes
+    revalidatePath(`/customer/cases/${caseId}`)
+
+    return {}
+  } catch (err) {
+    console.error('toggleReportShare error:', err)
+    return { error: 'An error occurred' }
+  }
+}
