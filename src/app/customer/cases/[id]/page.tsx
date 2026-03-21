@@ -112,7 +112,7 @@ export default async function CustomerCaseDetailPage({
   // 본인 사건인지 확인 (client_id 일치 필수)
   const { data: caseData } = await supabase
     .from('cases')
-    .select('id, title, status, created_at, fee_amount, advance_payment, description')
+    .select('id, title, status, created_at, description')
     .eq('id', id)
     .eq('client_id', user.id)
     .single()
@@ -136,9 +136,6 @@ export default async function CustomerCaseDetailPage({
   }
 
   const st = STATUS_CONFIG[caseData.status] ?? { label: caseData.status, color: 'bg-slate-700/50 text-slate-400 border-slate-600/30' }
-  const remaining = caseData.fee_amount != null && caseData.advance_payment != null
-    ? caseData.fee_amount - caseData.advance_payment
-    : null
 
   return (
     <div className="space-y-5">
@@ -163,24 +160,13 @@ export default async function CustomerCaseDetailPage({
           <p className="text-sm text-slate-400 leading-relaxed">{caseData.description}</p>
         )}
 
-        <div className="grid grid-cols-2 gap-3 pt-1">
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
+        <div className="pt-1">
+          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/30 inline-block">
             <p className="text-[11px] text-slate-500 mb-1">의뢰일</p>
             <p className="text-xs text-slate-300 font-medium">
               {formatDate(caseData.created_at, { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
-          {caseData.fee_amount != null && (
-            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
-              <p className="text-[11px] text-slate-500 mb-1">착수금 / 잔금</p>
-              <p className="text-xs text-slate-300 font-medium">
-                {caseData.advance_payment?.toLocaleString('ko-KR') ?? 0}원
-                {remaining != null && remaining > 0 && (
-                  <span className="text-slate-500"> / {remaining.toLocaleString('ko-KR')}원</span>
-                )}
-              </p>
-            </div>
-          )}
         </div>
       </div>
 

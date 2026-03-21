@@ -20,31 +20,6 @@ export function CreateCaseForm({
   const [clientMode, setClientMode] = useState<'new' | 'existing'>('new')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [feeDisplay, setFeeDisplay] = useState('')
-  const [advanceDisplay, setAdvanceDisplay] = useState('')
-
-  const formatNumberInput = (value: string) => {
-    const numOnly = value.replace(/[^0-9]/g, '')
-    return numOnly ? parseInt(numOnly).toLocaleString('ko-KR') : ''
-  }
-
-  const handleFeeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFeeDisplay(formatNumberInput(e.target.value))
-  }
-
-  const handleAdvanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAdvanceDisplay(formatNumberInput(e.target.value))
-  }
-
-  const updateRemaining = (fee: string, advance: string) => {
-    const feeNum = parseInt(fee.replace(/[^0-9]/g, '') || '0')
-    const advanceNum = parseInt(advance.replace(/[^0-9]/g, '') || '0')
-    const remaining = Math.max(0, feeNum - advanceNum)
-    const remainingField = document.getElementById('remainingBalance') as HTMLInputElement
-    if (remainingField) {
-      remainingField.value = remaining.toLocaleString('ko-KR')
-    }
-  }
 
   return (
     <form
@@ -169,55 +144,6 @@ export function CreateCaseForm({
               placeholder="예: 강남구 실종자 찾기 의뢰"
               className="w-full bg-slate-800 border border-slate-700 text-slate-50 placeholder:text-slate-500 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-green-500/50 focus:border-green-500 outline-none transition-colors"
             />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="text-sm font-medium text-slate-400 mb-1.5 block">수임료 (원)</label>
-              <input
-                type="text"
-                value={feeDisplay}
-                onChange={(e) => {
-                  handleFeeChange(e)
-                  updateRemaining(e.target.value, advanceDisplay)
-                }}
-                placeholder="1,000,000"
-                className="w-full bg-slate-800 border border-slate-700 text-slate-50 placeholder:text-slate-500 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-green-500/50 focus:border-green-500 outline-none transition-colors"
-              />
-              <input
-                name="feeAmount"
-                type="hidden"
-                value={parseInt(feeDisplay.replace(/[^0-9]/g, '') || '0')}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-slate-400 mb-1.5 block">착수금 (원)</label>
-              <input
-                type="text"
-                value={advanceDisplay}
-                onChange={(e) => {
-                  handleAdvanceChange(e)
-                  updateRemaining(feeDisplay, e.target.value)
-                }}
-                placeholder="500,000"
-                className="w-full bg-slate-800 border border-slate-700 text-slate-50 placeholder:text-slate-500 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-green-500/50 focus:border-green-500 outline-none transition-colors"
-              />
-              <input
-                name="advancePayment"
-                type="hidden"
-                value={parseInt(advanceDisplay.replace(/[^0-9]/g, '') || '0')}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-slate-400 mb-1.5 block">잔금 (원)</label>
-              <input
-                id="remainingBalance"
-                type="text"
-                readOnly
-                placeholder="0"
-                className="w-full bg-slate-800/50 border border-slate-700 text-slate-400 rounded-lg px-3 py-2.5 outline-none cursor-default"
-              />
-            </div>
           </div>
 
           <div>

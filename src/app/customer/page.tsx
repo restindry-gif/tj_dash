@@ -21,7 +21,7 @@ export default async function CustomerDashboard() {
   const supabase = createDatabaseClient()
   const { data: cases } = await supabase
     .from('cases')
-    .select('id, title, status, created_at, fee_amount, advance_payment')
+    .select('id, title, status, created_at')
     .eq('client_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -40,9 +40,6 @@ export default async function CustomerDashboard() {
         <div className="space-y-3">
           {cases.map((c) => {
             const st = STATUS_CONFIG[c.status] ?? { label: c.status, color: 'bg-slate-700/50 text-slate-400 border-slate-600/30' }
-            const remaining = c.fee_amount != null && c.advance_payment != null
-              ? c.fee_amount - c.advance_payment
-              : null
             return (
               <Link
                 key={c.id}
@@ -57,14 +54,6 @@ export default async function CustomerDashboard() {
                 </div>
                 <div className="flex items-center gap-4 text-xs text-slate-500">
                   <span>{formatDate(c.created_at, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                  {c.fee_amount && (
-                    <span className="text-slate-400">
-                      착수금 <span className="text-slate-300 font-medium">{c.advance_payment?.toLocaleString('ko-KR') ?? '-'}원</span>
-                      {remaining != null && remaining > 0 && (
-                        <span className="text-slate-500"> / 잔금 {remaining.toLocaleString('ko-KR')}원</span>
-                      )}
-                    </span>
-                  )}
                 </div>
               </Link>
             )

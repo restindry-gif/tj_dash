@@ -55,7 +55,11 @@
       "Bash(npx tsc:*)",
       "Bash(xargs grep:*)",
       "Bash(grep -n \"select\\\\|client_checked\\\\|client_comment\\\\|original_requested\" C:/tj_dash/src/app/admin/cases/[id]/reports-panel.tsx)",
-      "Bash(grep -n \"report\\\\|Report\\\\|shared\\\\|card\\\\|Card\" C:/tj_dash/src/app/customer/cases/[id]/page.tsx)"
+      "Bash(grep -n \"report\\\\|Report\\\\|shared\\\\|card\\\\|Card\" C:/tj_dash/src/app/customer/cases/[id]/page.tsx)",
+      "Bash(grep -rn \"routePts\\\\|RouteMap\\\\|route-map\\\\|location_tracks\" C:/tj_dash/src/app/staff/cases/[id]/report-item.tsx)",
+      "Bash(grep -r \"Leaflet\\\\|leaflet\\\\|L\\\\.map\\\\|L\\\\.tileLayer\" C:/tj_dash/src --include=*.tsx --include=*.ts -l)",
+      "Bash(grep -n \"z-50\\\\|z-40\\\\|z-30\\\\|z-20\\\\|z-10\\\\|fixed\\\\|absolute.*z\\\\|position.*z\" C:/tj_dash/src/app/staff/cases/[id]/drive/drive-mode-client.tsx)",
+      "Bash(grep -r \"\\\\.leaflet\\\\|leaflet.*css\\\\|\\\\.leaflet-\" C:/tj_dash --include=*.tsx --include=*.ts --include=*.css)"
     ]
   }
 }

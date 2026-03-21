@@ -2,7 +2,6 @@ import { createDatabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { CaseStatusForm } from './status-form'
 import { AssignStaffForm } from './assign-staff-form'
-import { FeeForm } from './fee-form'
 import { ReportsPanel } from './reports-panel'
 import { formatDateTime } from '@/lib/date'
 
@@ -83,15 +82,6 @@ export default async function CaseDetailPage({
         <div className="space-y-1">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">사건명</p>
           <p className="text-slate-300">{caseData.title || '-'}</p>
-        </div>
-
-        <div className="space-y-1">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">수임료</p>
-          <FeeForm
-            caseId={caseData.id}
-            feeAmount={caseData.fee_amount}
-            advancePayment={caseData.advance_payment}
-          />
         </div>
 
         <div className="space-y-1">
