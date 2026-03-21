@@ -153,30 +153,33 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
     <div className="space-y-6">
       {/* 검색 & 필터 바 */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="사건명, 고객명, 상담내용..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="flex-1 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 text-sm"
-          />
+        {/* 검색 입력 */}
+        <input
+          type="text"
+          placeholder="사건명, 고객명, 상담내용..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 text-sm"
+        />
+
+        {/* 버튼들 - 모바일에서는 2행, 데스크톱에서는 1행 */}
+        <div className="grid grid-cols-2 md:flex gap-2">
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 text-sm font-medium transition-colors"
+            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 text-sm font-medium transition-colors"
           >
             🔽 필터
           </button>
           <button
             onClick={handleSearch}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white text-sm font-medium transition-colors"
+            className="px-3 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white text-sm font-medium transition-colors"
           >
             검색
           </button>
           <button
             onClick={handleReset}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 text-sm transition-colors"
+            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 text-sm transition-colors"
           >
             초기화
           </button>
@@ -184,7 +187,7 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
 
         {/* 필터 모달 */}
         {isFilterOpen && (
-          <div className="border-t border-slate-800 pt-4 space-y-4">
+          <div className="border-t border-slate-800 pt-4 space-y-4 max-h-96 overflow-y-auto md:max-h-none md:overflow-y-visible">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">
@@ -316,7 +319,7 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
                 </div>
 
                 <span
-                  className={`text-xs rounded-full px-2.5 py-1 font-medium border shrink-0 ${STATUS_COLORS[caseItem.status]}`}
+                  className={`text-xs rounded-full px-2 py-1 font-medium border shrink-0 whitespace-nowrap ${STATUS_COLORS[caseItem.status]}`}
                 >
                   {STATUS_LABELS[caseItem.status]}
                 </span>
