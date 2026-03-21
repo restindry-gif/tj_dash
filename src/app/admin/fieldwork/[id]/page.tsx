@@ -38,6 +38,7 @@ interface CaseReport {
   total_points: number | null
   distance_km: number | null
   created_at: string
+  profiles?: { full_name: string } | null
 }
 
 interface LocationTrack { lat: number; lng: number; recorded_at: string }
@@ -95,7 +96,7 @@ export default async function AdminFieldworkCasePage({
     supabase.from('cases').select('*').eq('id', id).single(),
     supabase
       .from('case_reports')
-      .select('*')
+      .select('*, profiles!staff_id(full_name)')
       .eq('case_id', id)
       .is('deleted_at', null)
       .order('created_at', { ascending: false }),
