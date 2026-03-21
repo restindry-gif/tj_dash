@@ -246,6 +246,13 @@ export function ReportItem({
           </div>
         )}
 
+        {/* 위치 보고 지도 */}
+        {report.report_type === 'location' && report.lat && report.lng && (
+          <div className="rounded-lg overflow-hidden border border-slate-700/40">
+            <RouteMapDynamic points={[[report.lat, report.lng]]} />
+          </div>
+        )}
+
         {/* 사진 */}
         {report.media_url && report.report_type !== 'voice' && (
           <img src={report.media_url} alt="현장 사진" className="w-full rounded-lg max-h-56 object-cover border border-slate-700/40" />

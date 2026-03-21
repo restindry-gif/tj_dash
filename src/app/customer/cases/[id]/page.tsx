@@ -301,6 +301,13 @@ export default async function CustomerCaseDetailPage({
                       </div>
                     )}
 
+                    {/* 위치 보고 지도 */}
+                    {report.report_type === 'location' && report.lat && report.lng && (
+                      <div className="rounded-lg overflow-hidden border border-slate-700/40">
+                        <RouteMapDynamic points={[[report.lat, report.lng]]} />
+                      </div>
+                    )}
+
                     {/* 사진 */}
                     {report.media_url && (report.report_type === 'photo' || report.report_type === 'route') && (
                       <div className="space-y-2">
