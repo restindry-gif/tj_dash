@@ -16,58 +16,38 @@ const TYPE_CONFIG: Record<string, {
 }> = {
   text: {
     label: '텍스트',
-    accent: 'border-slate-500',
-    badge: 'bg-slate-700/60 text-slate-300',
-    iconBg: 'bg-slate-700/60',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-      </svg>
-    ),
+    accent: 'border-slate-400',
+    badge: 'bg-slate-700/80 text-slate-300',
+    iconBg: 'bg-slate-700/80',
+    icon: <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>,
   },
   location: {
     label: '위치',
-    accent: 'border-blue-500',
-    badge: 'bg-blue-500/10 text-blue-400',
-    iconBg: 'bg-blue-500/10',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
-        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
-      </svg>
-    ),
+    accent: 'border-blue-400',
+    badge: 'bg-blue-500/15 text-blue-300',
+    iconBg: 'bg-blue-500/15',
+    icon: <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
   },
   photo: {
     label: '사진',
-    accent: 'border-violet-500',
-    badge: 'bg-violet-500/10 text-violet-400',
-    iconBg: 'bg-violet-500/10',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-violet-400">
-        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>
-      </svg>
-    ),
+    accent: 'border-violet-400',
+    badge: 'bg-violet-500/15 text-violet-300',
+    iconBg: 'bg-violet-500/15',
+    icon: <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-violet-400"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg>,
   },
   voice: {
     label: '음성',
-    accent: 'border-red-500',
-    badge: 'bg-red-500/10 text-red-400',
-    iconBg: 'bg-red-500/10',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
-        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>
-      </svg>
-    ),
+    accent: 'border-red-400',
+    badge: 'bg-red-500/15 text-red-300',
+    iconBg: 'bg-red-500/15',
+    icon: <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>,
   },
   route: {
     label: '동선',
-    accent: 'border-orange-500',
-    badge: 'bg-orange-500/10 text-orange-400',
-    iconBg: 'bg-orange-500/10',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400">
-        <circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>
-      </svg>
-    ),
+    accent: 'border-orange-400',
+    badge: 'bg-orange-500/15 text-orange-300',
+    iconBg: 'bg-orange-500/15',
+    icon: <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-orange-400"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>,
   },
 }
 
@@ -99,23 +79,16 @@ export function ReportCard({
   const hasBadges = report.is_live || report.original_requested || report.client_checked
 
   return (
-    <div className={`border-l-4 ${cfg.accent} rounded-xl overflow-hidden transition-all ${
+    <div className={`rounded-xl overflow-hidden border-l-4 ${cfg.accent} transition-all duration-200 ${
       isShared
-        ? 'bg-emerald-950/30 border border-emerald-500/30 shadow-[0_0_0_1px_rgba(16,185,129,0.15)]'
-        : 'bg-slate-800/50 border border-slate-700/50'
+        ? 'bg-slate-800 border border-slate-600/70 shadow-md shadow-black/20'
+        : 'bg-slate-900/60 border border-slate-700/30'
     }`}>
-      {/* 공유 중 상태 띠 */}
-      {isShared && (
-        <div className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500/10 border-b border-emerald-500/20">
-          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
-            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-          </svg>
-          <span className="text-[11px] font-semibold text-emerald-400">고객에게 공유 중</span>
-        </div>
-      )}
-      {/* 헤더 1행: 타입 + 직원명 + 액션 */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/40">
+      {/* 헤더 */}
+      <div className={`flex items-center justify-between px-4 py-2.5 border-b ${
+        isShared ? 'border-slate-600/50' : 'border-slate-700/30'
+      }`}>
+        {/* 좌: 타입 + 공유상태 + 직원명 */}
         <div className="flex items-center gap-2 min-w-0">
           <span className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${cfg.iconBg}`}>
             {cfg.icon}
@@ -123,64 +96,71 @@ export function ReportCard({
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${cfg.badge}`}>
             {cfg.label}
           </span>
+          {/* 공유 상태 인라인 뱃지 */}
+          {isShared ? (
+            <span className="flex items-center gap-1 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              고객 공유 중
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-[10px] bg-slate-700/50 text-slate-500 border border-slate-600/30 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="11" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              비공개
+            </span>
+          )}
           {report.profiles?.full_name && (
             <span className="text-xs text-slate-400 truncate">{report.profiles.full_name}</span>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {/* 고객 공유 토글 */}
+        {/* 우: 공유 토글 + 링크 + 시간 */}
+        <div className="flex items-center gap-2 shrink-0 ml-2">
           <button
             onClick={handleToggleShare}
             disabled={isPending}
             title={isShared ? '공유 중단' : '고객과 공유'}
-            className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer whitespace-nowrap ${
               isPending ? 'opacity-50' : ''
             } ${
               isShared
-                ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25'
-                : 'bg-slate-700/60 text-slate-400 border-slate-600/40 hover:bg-slate-700'
+                ? 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-500'
+                : 'bg-slate-700/80 text-slate-300 border-slate-600/60 hover:bg-slate-700 hover:text-white'
             }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {isShared ? (
-                <>
-                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                </>
-              ) : (
-                <>
-                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" strokeDasharray="4 2"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" strokeDasharray="4 2"/>
-                </>
-              )}
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
             </svg>
             {isShared ? '공유 중' : '공유'}
           </button>
           <CopyLinkButton path={`/reports/${report.id}`} />
           <time className="text-xs text-slate-500 tabular-nums">
-            {formatDateTime(report.created_at, {
-              month: 'numeric', day: 'numeric',
-              hour: '2-digit', minute: '2-digit',
-            })}
+            {formatDateTime(report.created_at, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </time>
         </div>
       </div>
 
-      {/* 헤더 2행: 상태 뱃지 (있을 때만) */}
+      {/* 상태 뱃지 행 (LIVE / 원본요청 / 의뢰인확인) */}
       {hasBadges && (
-        <div className="flex items-center gap-1.5 px-4 py-1.5 border-b border-slate-700/30 flex-wrap">
+        <div className={`flex items-center gap-1.5 px-4 py-1.5 border-b flex-wrap ${
+          isShared ? 'border-slate-600/40 bg-slate-800/50' : 'border-slate-700/20 bg-slate-900/30'
+        }`}>
           {report.is_live && (
-            <span className="flex items-center gap-1 text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+            <span className="flex items-center gap-1 text-[10px] bg-red-500/15 text-red-400 border border-red-500/25 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
               <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />LIVE
             </span>
           )}
           {report.original_requested && (
-            <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+            <span className="text-[10px] bg-amber-500/15 text-amber-400 border border-amber-500/25 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
               원본 요청됨
             </span>
           )}
           {report.client_checked && (
-            <span className="flex items-center gap-1 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+            <span className="flex items-center gap-1 text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
               <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 6 9 17l-5-5"/>
               </svg>
@@ -190,18 +170,18 @@ export function ReportCard({
         </div>
       )}
 
-      {/* 바디 */}
-      <div className="px-4 py-3 space-y-3">
+      {/* 바디 — 미공유 시 opacity 낮춤 */}
+      <div className={`px-4 py-3 space-y-3 ${!isShared ? 'opacity-55' : ''}`}>
         {report.report_type === 'route' && (report.total_points || report.distance_km) && (
           <div className="grid grid-cols-2 gap-2">
             {report.total_points != null && (
-              <div className="bg-slate-900/60 rounded-lg p-3 text-center border border-slate-700/30">
+              <div className="bg-slate-900/80 rounded-lg p-3 text-center border border-slate-700/40">
                 <p className="text-base font-bold text-slate-50 tabular-nums">{report.total_points}</p>
                 <p className="text-[11px] text-slate-500 mt-0.5">기록된 위치</p>
               </div>
             )}
             {report.distance_km != null && (
-              <div className="bg-slate-900/60 rounded-lg p-3 text-center border border-slate-700/30">
+              <div className="bg-slate-900/80 rounded-lg p-3 text-center border border-slate-700/40">
                 <p className="text-base font-bold text-slate-50 tabular-nums">{Number(report.distance_km).toFixed(2)} km</p>
                 <p className="text-[11px] text-slate-500 mt-0.5">이동거리</p>
               </div>
@@ -215,7 +195,7 @@ export function ReportCard({
               <RouteMapDynamic points={routePts} />
             </div>
           ) : (
-            <div className="flex items-center gap-2 bg-slate-900/50 rounded-lg px-3 py-2.5 border border-slate-700/30">
+            <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2.5 border border-slate-700/30">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 shrink-0">
                 <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
               </svg>
@@ -225,7 +205,7 @@ export function ReportCard({
         )}
 
         {memo && (
-          <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap bg-slate-900/50 rounded-lg px-3 py-2 border border-slate-700/30">{memo}</p>
+          <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap bg-slate-900/60 rounded-lg px-3 py-2.5 border border-slate-700/30">{memo}</p>
         )}
 
         {report.content && report.report_type !== 'route' && (
@@ -233,19 +213,15 @@ export function ReportCard({
         )}
 
         {report.address && (
-          <div className="flex items-start gap-2 bg-blue-500/5 border border-blue-500/15 rounded-lg px-3 py-2.5">
+          <div className="flex items-start gap-2.5 bg-blue-500/5 border border-blue-500/15 rounded-lg px-3 py-2.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 mt-0.5 shrink-0">
               <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
             </svg>
             <div className="flex-1 min-w-0">
               <p className="text-blue-300 text-xs leading-relaxed">{report.address}</p>
               {report.lat && report.lng && (
-                <a
-                  href={`https://maps.google.com/?q=${report.lat},${report.lng}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 text-xs hover:text-blue-400 underline mt-1 inline-block"
-                >
+                <a href={`https://maps.google.com/?q=${report.lat},${report.lng}`} target="_blank" rel="noopener noreferrer"
+                  className="text-blue-500 text-xs hover:text-blue-400 underline mt-1 inline-block">
                   지도에서 보기 →
                 </a>
               )}
@@ -254,23 +230,18 @@ export function ReportCard({
         )}
 
         {report.media_url && (report.report_type === 'photo' || report.report_type === 'route') && (
-          <img
-            src={report.media_url}
-            alt="현장 사진"
-            className="w-full rounded-lg max-h-72 object-cover border border-slate-700/40"
-          />
+          <img src={report.media_url} alt="현장 사진" className="w-full rounded-lg max-h-72 object-cover border border-slate-700/40" />
         )}
 
         {report.media_url && report.report_type === 'voice' && (
-          <div className="bg-slate-900/60 rounded-lg px-3 py-3 border border-slate-700/30 space-y-1.5">
+          <div className="bg-slate-900/70 rounded-lg px-3 py-3 border border-slate-700/30 space-y-1.5">
             <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wide">음성 파일</p>
             <audio controls src={report.media_url} className="w-full h-10" />
           </div>
         )}
 
-        {/* 고객 코멘트 */}
         {report.client_comment && (
-          <div className="flex items-start gap-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg px-3 py-2.5">
+          <div className="flex items-start gap-2.5 bg-emerald-500/5 border border-emerald-500/20 rounded-lg px-3 py-2.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400 mt-0.5 shrink-0">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>

@@ -162,22 +162,22 @@ export default async function CustomerCaseDetailPage({
               return (
                 <div
                   key={report.id}
-                  className={`bg-slate-800/50 border border-slate-700/50 border-l-4 ${cfg.accent} rounded-xl overflow-hidden`}
+                  className={`bg-slate-800 border border-slate-600/60 border-l-4 ${cfg.accent} rounded-xl overflow-hidden shadow-sm shadow-black/20`}
                 >
                   {/* 헤더 */}
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/40">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-700/50">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${cfg.iconBg}`}>
                         {cfg.icon}
                       </span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${cfg.badge}`}>
                         {cfg.label}
                       </span>
                       {report.profiles?.full_name && (
-                        <span className="text-xs text-slate-400">{report.profiles.full_name}</span>
+                        <span className="text-xs text-slate-400 truncate">{report.profiles.full_name}</span>
                       )}
                     </div>
-                    <time className="text-xs text-slate-500 tabular-nums shrink-0">
+                    <time className="text-xs text-slate-500 tabular-nums shrink-0 ml-2">
                       {formatDateTime(report.created_at, {
                         month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
                       })}
