@@ -2,16 +2,7 @@ import { createDatabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { StatusChangeForm } from './status-form'
 import { ConvertToCaseButton } from './convert-button'
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+import { formatDateTime } from '@/lib/date'
 
 export default async function ConsultationDetailPage({
   params,
@@ -98,7 +89,7 @@ export default async function ConsultationDetailPage({
 
           <div>
             <p className="text-xs text-slate-400 mb-1">상담 일시</p>
-            <p className="text-slate-300">{formatDate(consultation.consultation_date)}</p>
+            <p className="text-slate-300">{formatDateTime(consultation.consultation_date, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
           </div>
 
           <div>
@@ -143,7 +134,7 @@ export default async function ConsultationDetailPage({
 
       {/* 메타 정보 */}
       <div className="text-xs text-slate-500 space-y-1 pb-4">
-        <p>등록일: {formatDate(consultation.created_at)}</p>
+        <p>등록일: {formatDateTime(consultation.created_at, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
         <p>ID: {consultation.id}</p>
       </div>
     </div>

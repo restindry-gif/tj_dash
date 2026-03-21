@@ -7,6 +7,7 @@ import { ReportForm } from './report-form'
 import { WorkSessionControl } from './work-session-control'
 import { CopyLinkButton } from '@/components/copy-link-button'
 import { CaseStatusForm } from '@/app/admin/cases/[id]/status-form'
+import { formatDateTime } from '@/lib/date'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: '대기',
@@ -274,7 +275,7 @@ function ReportItem({ report, caseId }: { report: CaseReport; caseId: string }) 
         <div className="flex items-center gap-2 shrink-0">
           <CopyLinkButton path={`/reports/${report.id}`} />
           <time className="text-[11px] text-slate-500 tabular-nums">
-            {new Date(report.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            {formatDateTime(report.created_at, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </time>
         </div>
       </div>

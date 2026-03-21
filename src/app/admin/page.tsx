@@ -1,16 +1,8 @@
 import { createDatabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { formatDate } from '@/lib/date'
 
 export const revalidate = 30
-
-// Helper for date formatting
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
 
 export default async function AdminPage() {
   const supabase = createDatabaseClient()

@@ -4,16 +4,7 @@ import { CaseStatusForm } from './status-form'
 import { AssignStaffForm } from './assign-staff-form'
 import { FeeForm } from './fee-form'
 import { ReportsPanel } from './reports-panel'
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+import { formatDateTime } from '@/lib/date'
 
 export default async function CaseDetailPage({
   params,
@@ -146,7 +137,7 @@ export default async function CaseDetailPage({
 
       {/* 메타 정보 */}
       <div className="text-slate-600 text-xs space-y-1">
-        <p>생성일: {formatDate(caseData.created_at)}</p>
+        <p>생성일: {formatDateTime(caseData.created_at, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
         <p>ID: {caseData.id}</p>
       </div>
     </div>

@@ -1,18 +1,9 @@
 import { createDatabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { updateConsultationStatus } from './actions'
+import { formatDateTime } from '@/lib/date'
 
 export const revalidate = 30
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
 
 export default async function ConsultationsPage() {
   const supabase = createDatabaseClient()
@@ -92,7 +83,7 @@ export default async function ConsultationsPage() {
               </div>
 
               <div className="text-sm text-slate-400 mb-2">
-                상담 일시: {formatDate(consultation.consultation_date)}
+                상담 일시: {formatDateTime(consultation.consultation_date, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </div>
 
               <div className="text-sm text-slate-300 bg-slate-800 rounded-lg px-3 py-2 line-clamp-2 whitespace-pre-wrap mb-3">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import { formatDateTime } from '@/lib/date'
 
 export type TrackPoint = {
   lat: number
@@ -22,7 +23,7 @@ function haversineM(a: TrackPoint, b: TrackPoint): number {
 }
 
 function fmtTime(iso: string) {
-  return new Date(iso).toLocaleString('ko-KR', {
+  return formatDateTime(iso, {
     month: 'numeric', day: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit',
     hour12: false,
@@ -87,7 +88,7 @@ export function RouteDownloadButton({ points, caseTitle, staffName, totalKm, rep
     ctx.font = '12px sans-serif'
     ctx.fillText(`담당: ${staffName}`, PADDING, 94)
     ctx.fillText(
-      `보고일시: ${new Date(reportDate).toLocaleString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
+      `보고일시: ${formatDateTime(reportDate, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
       PADDING, 112
     )
     ctx.fillText(

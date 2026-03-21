@@ -2,6 +2,7 @@ import { createDatabaseClient } from '@/lib/supabase/client'
 import { getCurrentUser } from '@/lib/auth/session'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { formatDate } from '@/lib/date'
 
 const STATUS_LABELS: Record<string, string> = {
   pending: '대기',
@@ -89,7 +90,7 @@ export default async function StaffDashboard() {
                     {c.title || '(제목 없음)'}
                   </p>
                   <p className="text-slate-500 text-xs mt-0.5">
-                    {new Date(c.created_at).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                    {formatDate(c.created_at, { month: 'long', day: 'numeric' })}
                   </p>
                 </div>
 

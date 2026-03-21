@@ -7,6 +7,7 @@ import { RouteMapDynamic } from '@/components/route-map-wrapper'
 import { RouteDownloadButton, type TrackPoint } from '@/components/route-download-button'
 import { OriginalRequestButton } from './original-request-button'
 import { ReportFeedback } from './report-feedback'
+import { formatDate, formatDateTime } from '@/lib/date'
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   pending:   { label: '대기 중',     color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
@@ -122,7 +123,7 @@ export default async function CustomerCaseDetailPage({
           <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
             <p className="text-[11px] text-slate-500 mb-1">의뢰일</p>
             <p className="text-xs text-slate-300 font-medium">
-              {new Date(caseData.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {formatDate(caseData.created_at, { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
           {caseData.fee_amount != null && (
@@ -176,7 +177,7 @@ export default async function CustomerCaseDetailPage({
                       )}
                     </div>
                     <time className="text-xs text-slate-500 tabular-nums shrink-0">
-                      {new Date(report.created_at).toLocaleString('ko-KR', {
+                      {formatDateTime(report.created_at, {
                         month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit',
                       })}
                     </time>

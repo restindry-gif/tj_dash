@@ -2,6 +2,7 @@ import { createDatabaseClient } from '@/lib/supabase/client'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { CustomerEditForm } from './edit-form'
+import { formatDate } from '@/lib/date'
 
 export default async function CustomerDetailPage({
   params,
@@ -69,7 +70,7 @@ export default async function CustomerDetailPage({
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-200 truncate">{c.title}</p>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    {new Date(c.created_at).toLocaleDateString('ko-KR')}
+                    {formatDate(c.created_at)}
                   </p>
                 </div>
                 <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_COLOR[c.status] ?? 'bg-slate-700 text-slate-400 border-slate-600'}`}>

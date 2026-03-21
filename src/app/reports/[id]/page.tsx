@@ -2,6 +2,7 @@ import React from 'react'
 import { createDatabaseClient } from '@/lib/supabase/client'
 import { notFound } from 'next/navigation'
 import { RouteMapDynamic } from '@/components/route-map-wrapper'
+import { formatDateTime } from '@/lib/date'
 
 const TYPE_CONFIG: Record<string, {
   label: string
@@ -142,7 +143,7 @@ export default async function ReportSharePage({
               )}
             </div>
             <time className="text-xs text-slate-500 tabular-nums shrink-0">
-              {new Date(report.created_at).toLocaleString('ko-KR', {
+              {formatDateTime(report.created_at, {
                 month: 'numeric', day: 'numeric',
                 hour: '2-digit', minute: '2-digit',
               })}

@@ -2,6 +2,7 @@ import { getCurrentUser } from '@/lib/auth/session'
 import { createDatabaseClient } from '@/lib/supabase/client'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { formatDate } from '@/lib/date'
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   pending:   { label: '대기 중',     color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
@@ -55,7 +56,7 @@ export default async function CustomerDashboard() {
                   </span>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-slate-500">
-                  <span>{new Date(c.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  <span>{formatDate(c.created_at, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                   {c.fee_amount && (
                     <span className="text-slate-400">
                       착수금 <span className="text-slate-300 font-medium">{c.advance_payment?.toLocaleString('ko-KR') ?? '-'}원</span>

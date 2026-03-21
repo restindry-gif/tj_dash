@@ -7,6 +7,7 @@ import { submitReport } from '@/app/staff/actions'
 import type { SpeechRecognitionEvent, SpeechRecognitionInstance } from '@/lib/speech-types'
 import '@/lib/speech-types'
 import { useRouteTracking } from '@/providers/route-tracking-provider'
+import { formatTime } from '@/lib/date'
 
 // ─── Image compression ───────────────────────────────────────
 const MAX_BYTES = 500 * 1024
@@ -84,7 +85,7 @@ export function DriveModeClient({ caseId, staffId, caseTitle }: Props) {
 
   useEffect(() => {
     setSttSupported(!!(window.SpeechRecognition || window.webkitSpeechRecognition))
-    const tick = () => setNow(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
+    const tick = () => setNow(formatTime(new Date(), { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
     tick()
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)

@@ -2,6 +2,7 @@ import React from 'react'
 import { createDatabaseClient } from '@/lib/supabase/client'
 import { RouteMapDynamic } from '@/components/route-map-wrapper'
 import { CopyLinkButton } from '@/components/copy-link-button'
+import { formatDateTime } from '@/lib/date'
 
 // ─── Type accent config ──────────────────────────────────────────────────────
 const TYPE_CONFIG: Record<string, {
@@ -163,7 +164,7 @@ export async function ReportsPanel({ caseId }: { caseId: string }) {
                   <div className="flex items-center gap-2 shrink-0">
                     <CopyLinkButton path={`/reports/${report.id}`} />
                     <time className="text-xs text-slate-500 tabular-nums">
-                      {new Date(report.created_at).toLocaleString('ko-KR', {
+                      {formatDateTime(report.created_at, {
                         month: 'numeric', day: 'numeric',
                         hour: '2-digit', minute: '2-digit',
                       })}

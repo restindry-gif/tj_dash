@@ -1,5 +1,6 @@
 import { createDatabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { formatDate } from '@/lib/date'
 
 export const revalidate = 30
 
@@ -95,7 +96,7 @@ export default async function AdminCasesPage() {
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs text-slate-600">
-                      {new Date(c.created_at).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                      {formatDate(c.created_at, { month: 'short', day: 'numeric' })}
                     </span>
                   </div>
                 </div>
