@@ -76,7 +76,21 @@ export function ReportItem({ report, caseId }: { report: CaseReport; caseId: str
   const hasBadges = report.is_live || report.original_requested || report.client_checked
 
   return (
-    <div className={`bg-slate-800/50 border border-slate-700/50 border-l-4 ${cfg.accent} rounded-xl overflow-hidden`}>
+    <div className={`border-l-4 ${cfg.accent} rounded-xl overflow-hidden transition-all ${
+      isShared
+        ? 'bg-emerald-950/30 border border-emerald-500/30 shadow-[0_0_0_1px_rgba(16,185,129,0.15)]'
+        : 'bg-slate-800/50 border border-slate-700/50'
+    }`}>
+      {/* 공유 중 상태 띠 */}
+      {isShared && (
+        <div className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500/10 border-b border-emerald-500/20">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          <span className="text-[11px] font-semibold text-emerald-400">고객에게 공유 중</span>
+        </div>
+      )}
       {/* 헤더 1행: 타입 + 액션 */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-700/40">
         {/* 타입 */}
