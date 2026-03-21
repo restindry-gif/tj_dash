@@ -19,7 +19,7 @@ export default async function Home() {
     <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-slate-50 text-slate-900 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center text-center max-w-2xl">
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl mb-4">
-          TJ 탐정 사무소
+          TJ Agency
         </h1>
         <p className="text-lg text-slate-600 mb-8">
           진실을 향한 끈질긴 추적. 프로페셔널한 탐정들이 당신의 고민을 해결해드립니다.
@@ -37,7 +37,7 @@ export default async function Home() {
         </div>
       </main>
       <footer className="mt-16 text-slate-500 text-sm">
-        &copy; 2026 TJ Detective Agency. All rights reserved.
+        &copy; 2026 TJ Agency. All rights reserved.
       </footer>
     </div>
   )

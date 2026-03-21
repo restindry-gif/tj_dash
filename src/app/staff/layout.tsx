@@ -13,7 +13,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
       {/* Desktop sidebar (lg+) */}
       <aside className="hidden lg:flex fixed top-0 left-0 h-screen w-64 bg-slate-900 border-r border-slate-800 flex-col z-50">
         <div className="h-14 flex items-center px-5 border-b border-slate-800 shrink-0">
-          <span className="text-slate-50 text-lg font-bold tracking-tight">TJ 탐정</span>
+          <span className="text-slate-50 text-lg font-bold tracking-tight">TJ Agency</span>
           <span className="ml-2 text-xs text-blue-400 font-medium">직원</span>
         </div>
 
@@ -56,7 +56,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
       {/* Mobile top header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-slate-900/95 backdrop-blur border-b border-slate-800 flex items-center justify-between px-4 z-40">
         <div className="flex items-center gap-2">
-          <span className="text-slate-50 text-base font-bold tracking-tight">TJ 탐정</span>
+          <span className="text-slate-50 text-base font-bold tracking-tight">TJ Agency</span>
           <span className="text-xs text-blue-400 font-medium">직원</span>
         </div>
         {user && (

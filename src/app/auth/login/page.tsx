@@ -23,7 +23,7 @@ export default async function LoginPage() {
             <span className="text-white font-bold text-xl">TJ</span>
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-50">TJ 탐정</h1>
+            <h1 className="text-2xl font-bold text-slate-50">TJ Agency</h1>
             <p className="mt-1 text-sm text-slate-400">탐정사무소 대시보드</p>
           </div>
         </div>

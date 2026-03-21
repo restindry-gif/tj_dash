@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Sovereign Intelligence | TJ 탐정",
+  title: "TJ Agency",
   description: "탐정사무소 현장 업무 관리 시스템",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 };
