@@ -74,7 +74,7 @@ export default async function CustomerCaseDetailPage({
 
   const { data: reports } = await supabase
     .from('case_reports')
-    .select('*, profiles(full_name)')
+    .select('*, profiles!staff_id(full_name)')
     .eq('case_id', id)
     .eq('is_live', false)
     .eq('is_shared_with_customer', true)

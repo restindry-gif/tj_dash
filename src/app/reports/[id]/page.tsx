@@ -88,7 +88,7 @@ export default async function ReportSharePage({
 
   const { data: report } = await supabase
     .from('case_reports')
-    .select('*, profiles(full_name)')
+    .select('*, profiles!staff_id(full_name)')
     .eq('id', id)
     .single()
 

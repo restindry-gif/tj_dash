@@ -22,7 +22,7 @@ export async function ReportsPanel({ caseId }: { caseId: string }) {
 
   const { data: reports, error } = await supabase
     .from('case_reports')
-    .select('*, profiles(full_name)')
+    .select('*, profiles!staff_id(full_name)')
     .eq('case_id', caseId)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })

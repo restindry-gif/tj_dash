@@ -27,7 +27,7 @@ export default async function TrashPage() {
 
   const { data: trashed } = await supabase
     .from('case_reports')
-    .select('*, cases(id, title), profiles(full_name)')
+    .select('*, cases(id, title), profiles!staff_id(full_name)')
     .not('deleted_at', 'is', null)
     .order('deleted_at', { ascending: false })
 
