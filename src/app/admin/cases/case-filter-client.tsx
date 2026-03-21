@@ -64,16 +64,27 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
   }
 
   // 필터 초기화
-  function handleReset() {
+  async function handleReset() {
     setSearch('')
     setDateFrom('')
     setDateTo('')
     setAssignedStaffId(undefined)
     setStatuses([])
     setStarredOnly(false)
-    setCases(initialCases)
     setOffset(20)
-    setHasMore(initialCases.length === 20)
+
+    // DB에서 최신 데이터 로드 (별 상태 포함)
+    try {
+      const results = await searchCases({
+        offset: 0,
+        limit: 20,
+      })
+      setCases(results)
+      setHasMore(results.length === 20)
+    } catch (error) {
+      console.error('Reset failed:', error)
+      alert('초기화 중 오류가 발생했습니다.')
+    }
   }
 
   // 상태 체크박스 토글
