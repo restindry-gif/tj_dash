@@ -73,43 +73,28 @@ export function ReportItem({ report, caseId }: { report: CaseReport; caseId: str
     })
   }
 
+  const hasBadges = report.is_live || report.original_requested || report.client_checked
+
   return (
     <div className={`bg-slate-800/50 border border-slate-700/50 border-l-4 ${cfg.accent} rounded-xl overflow-hidden`}>
-      {/* 헤더 */}
+      {/* 헤더 1행: 타입 + 액션 */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-700/40">
-        <div className="flex items-center gap-2">
+        {/* 타입 */}
+        <div className="flex items-center gap-2 min-w-0">
           <span className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${cfg.iconBg}`}>
             {cfg.icon}
           </span>
-          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}>
+          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${cfg.badge}`}>
             {cfg.label}
           </span>
-          {report.is_live && (
-            <span className="flex items-center gap-1 text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 rounded-full px-2 py-0.5 font-semibold">
-              <span className="w-1 h-1 rounded-full bg-red-400 animate-pulse" />LIVE
-            </span>
-          )}
-          {report.original_requested && (
-            <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full px-2 py-0.5 font-semibold">
-              원본 요청됨
-            </span>
-          )}
-          {report.client_checked && (
-            <span className="flex items-center gap-1 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full px-2 py-0.5 font-semibold">
-              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 6 9 17l-5-5"/>
-              </svg>
-              의뢰인 확인
-            </span>
-          )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {/* 고객 공유 토글 */}
+        {/* 액션: 공유 토글 + 링크 + 시간 */}
+        <div className="flex items-center gap-2 shrink-0 ml-2">
           <button
             onClick={handleToggleShare}
             disabled={isPending}
             title={isShared ? '공유 중단' : '고객과 공유'}
-            className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+            className={`flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg border transition-all cursor-pointer whitespace-nowrap ${
               isPending ? 'opacity-50' : ''
             } ${
               isShared
@@ -117,7 +102,7 @@ export function ReportItem({ report, caseId }: { report: CaseReport; caseId: str
                 : 'bg-slate-700/60 text-slate-400 border-slate-600/40 hover:bg-slate-700'
             }`}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
               <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
             </svg>
@@ -129,6 +114,29 @@ export function ReportItem({ report, caseId }: { report: CaseReport; caseId: str
           </time>
         </div>
       </div>
+      {/* 헤더 2행: 상태 뱃지 (있을 때만) */}
+      {hasBadges && (
+        <div className="flex items-center gap-1.5 px-4 py-1.5 border-b border-slate-700/30 flex-wrap">
+          {report.is_live && (
+            <span className="flex items-center gap-1 text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+              <span className="w-1 h-1 rounded-full bg-red-400 animate-pulse" />LIVE
+            </span>
+          )}
+          {report.original_requested && (
+            <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+              원본 요청됨
+            </span>
+          )}
+          {report.client_checked && (
+            <span className="flex items-center gap-1 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+              의뢰인 확인
+            </span>
+          )}
+        </div>
+      )}
       {/* 바디 */}
       <div className="px-4 py-3 space-y-2.5">
         {report.content && (
