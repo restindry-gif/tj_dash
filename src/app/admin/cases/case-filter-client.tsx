@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { searchCases, toggleStarred } from './actions'
 
 interface CaseItem {
@@ -289,13 +290,15 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
         ) : (
           <div className="divide-y divide-slate-800">
             {cases.map((caseItem) => (
-              <div
+              <Link
                 key={caseItem.id}
-                className="flex items-start gap-3 p-4 hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                href={`/admin/cases/${caseItem.id}`}
+                className="flex items-start gap-3 p-4 hover:bg-slate-800/50 transition-colors group"
               >
                 <button
                   onClick={(e) => {
                     e.preventDefault()
+                    e.stopPropagation()
                     handleToggleStar(caseItem.id, caseItem.is_starred)
                   }}
                   className="text-lg mt-0.5 hover:scale-110 transition-transform shrink-0"
@@ -323,7 +326,7 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
                 >
                   {STATUS_LABELS[caseItem.status]}
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
         )}
