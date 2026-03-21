@@ -380,3 +380,105 @@ export async function purgeExpiredReports(): Promise<void> {
     .not('deleted_at', 'is', null)
     .lt('deleted_at', cutoff)
 }
+
+interface SearchParams {
+  search?: string
+  dateFrom?: string
+  dateTo?: string
+  assignedStaffId?: string | null
+  statuses?: string[]
+  starredOnly?: boolean
+  offset: number
+  limit: number
+}
+
+/**
+ * 검색 & 필터로 사건 목록 조회
+ */
+export async function searchCases(params: SearchParams) {
+  const supabase = createDatabaseClient()
+
+  let query = supabase
+    .from('cases')
+    .select('*, profiles!assigned_staff_id(full_name)')
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+
+  // 검색 (title, description, consultation_notes)
+  if (params.search?.trim()) {
+    const terms = params.search.trim().split(/\s+/)
+    const searchConditions = terms
+      .map((term) => `title.ilike.%${term}%,description.ilike.%${term}%,consultation_notes.ilike.%${term}%`)
+      .join(',')
+    query = query.or(searchConditions)
+  }
+
+  // 날짜 범위
+  if (params.dateFrom) {
+    query = query.gte('created_at', `${params.dateFrom}T00:00:00`)
+  }
+  if (params.dateTo) {
+    query = query.lte('created_at', `${params.dateTo}T23:59:59`)
+  }
+
+  // 담당자
+  if (params.assignedStaffId !== undefined) {
+    if (params.assignedStaffId === null) {
+      query = query.is('assigned_staff_id', null)
+    } else {
+      query = query.eq('assigned_staff_id', params.assignedStaffId)
+    }
+  }
+
+  // 상태 (다중 선택)
+  if (params.statuses && params.statuses.length > 0) {
+    query = query.in('status', params.statuses)
+  }
+
+  // 중요만
+  if (params.starredOnly) {
+    query = query.eq('is_starred', true)
+  }
+
+  // 페이지네이션
+  query = query.range(params.offset, params.offset + params.limit - 1)
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error('searchCases error:', error)
+    throw new Error(`Failed to search cases: ${error.message}`)
+  }
+
+  return data || []
+}
+
+/**
+ * 사건 중요 표시 토글
+ */
+export async function toggleStarred(caseId: string) {
+  const supabase = createDatabaseClient()
+
+  // 현재 값 조회
+  const { data: currentCase, error: fetchError } = await supabase
+    .from('cases')
+    .select('is_starred')
+    .eq('id', caseId)
+    .single()
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch case: ${fetchError.message}`)
+  }
+
+  // 토글
+  const { error: updateError } = await supabase
+    .from('cases')
+    .update({ is_starred: !currentCase.is_starred })
+    .eq('id', caseId)
+
+  if (updateError) {
+    throw new Error(`Failed to update case: ${updateError.message}`)
+  }
+
+  return { id: caseId, is_starred: !currentCase.is_starred }
+}
