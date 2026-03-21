@@ -9,6 +9,8 @@ import { CopyLinkButton } from '@/components/copy-link-button'
 import { CaseStatusForm } from '@/app/admin/cases/[id]/status-form'
 import { formatDateTime } from '@/lib/date'
 import { ReportItem } from './report-item'
+import { ReportDateGroup } from '@/components/report-date-group'
+import { getKSTDateKey, getKSTTodayKey, getDateGroupLabel } from '@/lib/date'
 
 interface LocationTrack { lat: number; lng: number; recorded_at: string }
 interface PointMeta { time: string; address: string }
@@ -272,23 +274,43 @@ export default async function StaffCaseDetailPage({
         </div>
         {!reports || reports.length === 0 ? (
           <p className="text-slate-500 text-sm text-center py-8">보고 내역이 없습니다.</p>
-        ) : (
-          <div className="p-3 space-y-2.5">
-            {(reports as CaseReport[]).map((report) => {
-              const rd = report.session_id ? routeDataMap[report.session_id] : undefined
-              return (
-                <ReportItem
-                  key={report.id}
-                  report={report}
-                  caseId={id}
-                  routePts={rd?.points}
-                  routeStartMeta={rd?.startMeta}
-                  routeEndMeta={rd?.endMeta}
-                />
-              )
-            })}
-          </div>
-        )}
+        ) : (() => {
+          const todayKey = getKSTTodayKey()
+          const groupMap = new Map<string, CaseReport[]>()
+          for (const r of reports as CaseReport[]) {
+            const key = getKSTDateKey(r.created_at)
+            if (!groupMap.has(key)) groupMap.set(key, [])
+            groupMap.get(key)!.push(r)
+          }
+          const groups = Array.from(groupMap.entries()).sort((a, b) => b[0].localeCompare(a[0]))
+          const openKey = groupMap.has(todayKey) ? todayKey : groups[0]?.[0]
+          return (
+            <div className="p-3 space-y-2">
+              {groups.map(([dateKey, dateReports]) => (
+                <ReportDateGroup
+                  key={dateKey}
+                  label={getDateGroupLabel(dateKey)}
+                  count={dateReports.length}
+                  defaultOpen={dateKey === openKey}
+                >
+                  {dateReports.map((report) => {
+                    const rd = report.session_id ? routeDataMap[report.session_id] : undefined
+                    return (
+                      <ReportItem
+                        key={report.id}
+                        report={report}
+                        caseId={id}
+                        routePts={rd?.points}
+                        routeStartMeta={rd?.startMeta}
+                        routeEndMeta={rd?.endMeta}
+                      />
+                    )
+                  })}
+                </ReportDateGroup>
+              ))}
+            </div>
+          )
+        })()}
       </div>
     </div>
   )

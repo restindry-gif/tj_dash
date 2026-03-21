@@ -7,7 +7,8 @@ import { RouteMapDynamic } from '@/components/route-map-wrapper'
 import { RouteDownloadButton, type TrackPoint } from '@/components/route-download-button'
 import { OriginalRequestButton } from './original-request-button'
 import { ReportFeedback } from './report-feedback'
-import { formatDate, formatDateTime } from '@/lib/date'
+import { formatDate, formatDateTime, getKSTDateKey, getKSTTodayKey, getDateGroupLabel } from '@/lib/date'
+import { ReportDateGroup } from '@/components/report-date-group'
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   pending:   { label: '대기 중',     color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
@@ -191,9 +192,26 @@ export default async function CustomerCaseDetailPage({
           <div className="text-center py-10 border border-slate-800 rounded-xl bg-slate-900/30">
             <p className="text-slate-500 text-sm">아직 보고 내용이 없습니다.</p>
           </div>
-        ) : (
-          <div className="space-y-2.5">
-            {reports.map((report) => {
+        ) : (() => {
+          const todayKey = getKSTTodayKey()
+          const groupMap = new Map<string, typeof reports>()
+          for (const r of reports) {
+            const key = getKSTDateKey(r.created_at)
+            if (!groupMap.has(key)) groupMap.set(key, [])
+            groupMap.get(key)!.push(r)
+          }
+          const groups = Array.from(groupMap.entries()).sort((a, b) => b[0].localeCompare(a[0]))
+          const openKey = groupMap.has(todayKey) ? todayKey : groups[0]?.[0]
+          return (
+          <div className="space-y-2">
+            {groups.map(([dateKey, dateReports]) => (
+              <ReportDateGroup
+                key={dateKey}
+                label={getDateGroupLabel(dateKey)}
+                count={dateReports.length}
+                defaultOpen={dateKey === openKey}
+              >
+                {dateReports.map((report) => {
               const cfg = TYPE_CONFIG[report.report_type] ?? TYPE_CONFIG.text
               const rd = routeDataMap[report.id]
               const trackPoints = rd?.tracks ?? []
@@ -368,8 +386,11 @@ export default async function CustomerCaseDetailPage({
                 </div>
               )
             })}
+              </ReportDateGroup>
+            ))}
           </div>
-        )}
+          )
+        })()}
       </div>
     </div>
   )

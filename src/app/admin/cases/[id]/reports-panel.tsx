@@ -1,7 +1,8 @@
 import { createDatabaseClient } from '@/lib/supabase/client'
 import { getCurrentUser } from '@/lib/auth/session'
-import { formatDateTime } from '@/lib/date'
+import { formatDateTime, getKSTDateKey, getKSTTodayKey, getDateGroupLabel } from '@/lib/date'
 import { ReportCard } from './report-card'
+import { ReportDateGroup } from '@/components/report-date-group'
 import type { Report } from '@/lib/types/report'
 
 interface LocationTrack { lat: number; lng: number; recorded_at: string }
@@ -84,9 +85,6 @@ export async function ReportsPanel({ caseId }: { caseId: string }) {
     return (
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
         <p className="text-red-400 text-sm">보고 내역 조회 오류: {error.message}</p>
-        {error.message.includes('is_shared_with_customer') && (
-          <p className="text-slate-500 text-xs mt-2">Supabase 마이그레이션을 실행해주세요: <code>ALTER TABLE case_reports ADD COLUMN is_shared_with_customer BOOLEAN NOT NULL DEFAULT false;</code></p>
-        )}
       </div>
     )
   }
@@ -98,6 +96,17 @@ export async function ReportsPanel({ caseId }: { caseId: string }) {
     routeReports.forEach((r, i) => { routeDataMap[r.session_id as string] = results[i] })
   }
 
+  // 날짜별 그룹핑 (KST 기준, 최신순)
+  const todayKey = getKSTTodayKey()
+  const groupMap = new Map<string, Report[]>()
+  for (const report of (reports as Report[] ?? [])) {
+    const key = getKSTDateKey(report.created_at)
+    if (!groupMap.has(key)) groupMap.set(key, [])
+    groupMap.get(key)!.push(report)
+  }
+  const groups = Array.from(groupMap.entries()).sort((a, b) => b[0].localeCompare(a[0]))
+  const openKey = groupMap.has(todayKey) ? todayKey : groups[0]?.[0]
+
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
       <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
@@ -108,21 +117,30 @@ export async function ReportsPanel({ caseId }: { caseId: string }) {
       {!reports || reports.length === 0 ? (
         <p className="text-slate-500 text-sm text-center py-10">현장 보고가 없습니다.</p>
       ) : (
-        <div className="p-4 space-y-3">
-          {(reports as Report[]).map((report) => {
-            const rd = report.session_id ? routeDataMap[report.session_id] : undefined
-            return (
-              <ReportCard
-                key={report.id}
-                report={report}
-                caseId={caseId}
-                routePts={rd?.points}
-                routeStartMeta={rd?.startMeta}
-                routeEndMeta={rd?.endMeta}
-                isAdmin={isAdmin}
-              />
-            )
-          })}
+        <div className="p-4 space-y-2">
+          {groups.map(([dateKey, dateReports]) => (
+            <ReportDateGroup
+              key={dateKey}
+              label={getDateGroupLabel(dateKey)}
+              count={dateReports.length}
+              defaultOpen={dateKey === openKey}
+            >
+              {dateReports.map((report) => {
+                const rd = report.session_id ? routeDataMap[report.session_id] : undefined
+                return (
+                  <ReportCard
+                    key={report.id}
+                    report={report}
+                    caseId={caseId}
+                    routePts={rd?.points}
+                    routeStartMeta={rd?.startMeta}
+                    routeEndMeta={rd?.endMeta}
+                    isAdmin={isAdmin}
+                  />
+                )
+              })}
+            </ReportDateGroup>
+          ))}
         </div>
       )}
     </div>

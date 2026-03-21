@@ -2,6 +2,34 @@
 
 const KST = 'Asia/Seoul'
 
+/** KST 기준 날짜 키 (YYYY-MM-DD) 반환 */
+export function getKSTDateKey(isoString: string): string {
+  return new Date(isoString).toLocaleDateString('en-CA', { timeZone: KST })
+}
+
+/** 오늘의 KST 날짜 키 */
+export function getKSTTodayKey(): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone: KST })
+}
+
+/** 날짜 키 → 아코디언 라벨 (오늘/어제/M월 D일 (요일)) */
+export function getDateGroupLabel(dateKey: string): string {
+  const todayKey = getKSTTodayKey()
+  const yesterdayKey = new Date(Date.now() - 86400000).toLocaleDateString('en-CA', { timeZone: KST })
+  const [y, mo, d] = dateKey.split('-').map(Number)
+  // UTC 03:00 = KST 12:00 — 타임존 경계 안전하게 파싱
+  const dt = new Date(Date.UTC(y, mo - 1, d, 3, 0, 0))
+  const label = dt.toLocaleDateString('ko-KR', {
+    timeZone: KST,
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+  })
+  if (dateKey === todayKey) return `오늘 · ${label}`
+  if (dateKey === yesterdayKey) return `어제 · ${label}`
+  return label
+}
+
 export function formatDate(
   date: string | Date,
   options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }
