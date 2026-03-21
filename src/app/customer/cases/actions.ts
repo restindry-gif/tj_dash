@@ -1,8 +1,16 @@
 'use server'
 
-import { createDatabaseClient } from '@/lib/supabase/client'
+import { createClient } from '@supabase/supabase-js'
 import { getCurrentUser } from '@/lib/auth/session'
 import { revalidatePath } from 'next/cache'
+
+/** RLS 우회 필요한 고객 액션용 서비스 롤 클라이언트 */
+function createServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 export async function requestOriginalPhoto(
   reportId: string,
@@ -11,7 +19,7 @@ export async function requestOriginalPhoto(
   const user = await getCurrentUser()
   if (!user) return { error: '로그인이 필요합니다.' }
 
-  const supabase = createDatabaseClient()
+  const supabase = createServiceClient()
   const { error } = await supabase
     .from('case_reports')
     .update({ original_requested: true })
@@ -29,14 +37,14 @@ export async function toggleReportCheck(
   const user = await getCurrentUser()
   if (!user) return { error: '로그인이 필요합니다.' }
 
-  const supabase = createDatabaseClient()
+  const supabase = createServiceClient()
   const { error } = await supabase
     .from('case_reports')
     .update({ client_checked: checked })
     .eq('id', reportId)
 
   if (error) return { error: error.message }
-  revalidatePath(`/customer/cases/${caseId}`)
+  // revalidatePath 제거 — optimistic update로 충분, 새로고침 시 리셋 방지
 }
 
 export async function submitReportComment(
@@ -47,7 +55,7 @@ export async function submitReportComment(
   const user = await getCurrentUser()
   if (!user) return { error: '로그인이 필요합니다.' }
 
-  const supabase = createDatabaseClient()
+  const supabase = createServiceClient()
   const { error } = await supabase
     .from('case_reports')
     .update({ client_comment: comment.trim() || null })
