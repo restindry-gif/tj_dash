@@ -22,6 +22,7 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [offset, setOffset] = useState(20)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
   const observerTarget = useRef<HTMLDivElement>(null)
 
   // 필터 상태
@@ -54,6 +55,7 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
       })
       setCases(results)
       setOffset(20)
+      setHasMore(results.length === 20)
     } catch (error) {
       console.error('Search failed:', error)
       alert('검색 중 오류가 발생했습니다.')
@@ -70,6 +72,7 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
     setStarredOnly(false)
     setCases(initialCases)
     setOffset(20)
+    setHasMore(initialCases.length === 20)
   }
 
   // 상태 체크박스 토글
@@ -96,7 +99,7 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
   useEffect(() => {
     const observer = new IntersectionObserver(
       async ([entry]) => {
-        if (entry.isIntersecting && !isLoadingMore && cases.length > 0) {
+        if (entry.isIntersecting && !isLoadingMore && hasMore && cases.length > 0) {
           setIsLoadingMore(true)
           try {
             const more = await searchCases({
@@ -107,6 +110,13 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
             if (more.length > 0) {
               setCases((prev) => [...prev, ...more])
               setOffset((prev) => prev + 10)
+              // 10개 미만이면 더 이상 데이터 없음
+              if (more.length < 10) {
+                setHasMore(false)
+              }
+            } else {
+              // 0개 반환 = 데이터 끝
+              setHasMore(false)
             }
           } catch (error) {
             console.error('Failed to load more:', error)
@@ -123,7 +133,7 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
     }
 
     return () => observer.disconnect()
-  }, [offset, isLoadingMore, search, dateFrom, dateTo, assignedStaffId, statuses, starredOnly])
+  }, [offset, isLoadingMore, hasMore, search, dateFrom, dateTo, assignedStaffId, statuses, starredOnly])
 
   const STATUS_LABELS: Record<string, string> = {
     pending: '대기',
@@ -317,9 +327,9 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
       </div>
 
       {/* 무한 스크롤 감지 영역 */}
-      <div ref={observerTarget} className="h-4" />
+      {hasMore && <div ref={observerTarget} className="h-4" />}
 
-      {isLoadingMore && (
+      {isLoadingMore && hasMore && (
         <div className="text-center py-4">
           <p className="text-slate-500 text-sm">더 불러오는 중...</p>
         </div>
