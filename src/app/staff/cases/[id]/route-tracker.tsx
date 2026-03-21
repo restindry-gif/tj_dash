@@ -37,6 +37,8 @@ function totalDistance(points: TrackPoint[]) {
 }
 
 const BATCH_SIZE = 10
+const TRACK_INTERVAL_MS = 10_000   // 초기 3초 이후 10초에 1회 기록
+const INITIAL_FAST_SECS = 3        // 시작 직후 빠른 수신 구간
 
 export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps) {
   const [status, setStatus] = useState<'idle' | 'tracking' | 'confirming' | 'saving' | 'done'>('idle')
@@ -46,6 +48,7 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
   const [note, setNote] = useState('')
   const [listening, setListening] = useState(false)
   const [sttSupported, setSttSupported] = useState(false)
+  const [wakeLockActive, setWakeLockActive] = useState(false)
 
   const sessionIdRef = useRef<string>('')
   const reportIdRef = useRef<string>('')
@@ -56,6 +59,9 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const elapsedRef = useRef(0)
+  const lastRecordedRef = useRef(0)           // 마지막 기록 시각 (ms)
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null)
+  const trackingStartRef = useRef(0)          // 추적 시작 시각 (ms)
 
   useEffect(() => {
     setSttSupported(!!(window.SpeechRecognition || window.webkitSpeechRecognition))
@@ -113,6 +119,36 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
     )
   }, [caseId, staffId])
 
+  const acquireWakeLock = async () => {
+    if (!('wakeLock' in navigator)) return
+    try {
+      wakeLockRef.current = await (navigator as Navigator & { wakeLock: { request: (type: string) => Promise<WakeLockSentinel> } }).wakeLock.request('screen')
+      setWakeLockActive(true)
+      wakeLockRef.current.addEventListener('release', () => setWakeLockActive(false))
+    } catch {
+      // 지원 안 하는 환경이면 무시
+    }
+  }
+
+  const releaseWakeLock = () => {
+    wakeLockRef.current?.release()
+    wakeLockRef.current = null
+    setWakeLockActive(false)
+  }
+
+  const recordPoint = (pos: GeolocationPosition) => {
+    const point: TrackPoint = {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude,
+      accuracy: pos.coords.accuracy,
+      recordedAt: new Date().toISOString(),
+    }
+    pendingRef.current.push(point)
+    allPointsRef.current.push(point)
+    setPointCount((n) => n + 1)
+    if (pendingRef.current.length >= BATCH_SIZE) flushPoints()
+  }
+
   const startTracking = async () => {
     if (!navigator.geolocation) {
       setError('이 브라우저는 GPS를 지원하지 않습니다.')
@@ -124,6 +160,8 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
     setElapsed(0)
     allPointsRef.current = []
     pendingRef.current = []
+    lastRecordedRef.current = 0
+    trackingStartRef.current = Date.now()
 
     const sessionId = crypto.randomUUID()
     sessionIdRef.current = sessionId
@@ -136,22 +174,18 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
     }
     reportIdRef.current = result.reportId!
 
+    // 화면 켜짐 잠금 (모바일 백그라운드 방지)
+    await acquireWakeLock()
+
     timerRef.current = setInterval(() => setElapsed((s) => s + 1), 1000)
 
-    // Capture 3 initial points at 1-second intervals before watchPosition stabilises
-    for (let i = 0; i < 3; i++) {
+    // 초기 3초: 1초 간격으로 빠른 수신 (GPS 정확도 안정화)
+    for (let i = 0; i < INITIAL_FAST_SECS; i++) {
       setTimeout(() => {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
-            const point: TrackPoint = {
-              lat: pos.coords.latitude,
-              lng: pos.coords.longitude,
-              accuracy: pos.coords.accuracy,
-              recordedAt: new Date().toISOString(),
-            }
-            pendingRef.current.push(point)
-            allPointsRef.current.push(point)
-            setPointCount((n) => n + 1)
+            lastRecordedRef.current = Date.now()
+            recordPoint(pos)
           },
           () => {},
           { enableHighAccuracy: true, timeout: 10000 }
@@ -159,21 +193,20 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
       }, i * 1000)
     }
 
+    // 이후: watchPosition으로 GPS를 warm하게 유지하되 10초에 1회만 기록
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
-        const point: TrackPoint = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-          recordedAt: new Date().toISOString(),
-        }
-        pendingRef.current.push(point)
-        allPointsRef.current.push(point)
-        setPointCount((n) => n + 1)
-        if (pendingRef.current.length >= BATCH_SIZE) flushPoints()
+        const now = Date.now()
+        const elapsed = now - trackingStartRef.current
+        // 초기 3초 구간은 이미 위에서 처리
+        if (elapsed < INITIAL_FAST_SECS * 1000) return
+        // 10초 미만이면 건너뜀
+        if (now - lastRecordedRef.current < TRACK_INTERVAL_MS) return
+        lastRecordedRef.current = now
+        recordPoint(pos)
       },
       (err) => setError(`GPS 오류: ${err.message}`),
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+      { enableHighAccuracy: true, maximumAge: 9000, timeout: 15000 }
     )
   }
 
@@ -182,6 +215,7 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
     setListening(false)
     if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current)
     if (timerRef.current) clearInterval(timerRef.current)
+    releaseWakeLock()
     setStatus('confirming')
   }
 
@@ -269,6 +303,25 @@ export function RouteTracker({ caseId, staffId, onComplete }: RouteTrackerProps)
                 <p className="text-xs text-slate-500 mt-0.5">이동거리 (km)</p>
               </div>
             </div>
+          </div>
+
+          {/* 백그라운드 경고 */}
+          <div className={`flex items-start gap-2 rounded-lg px-3 py-2.5 text-xs ${
+            wakeLockActive
+              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+              : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
+          }`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+              {wakeLockActive
+                ? <><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/><path d="m9 12 2 2 4-4"/></>
+                : <><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>
+              }
+            </svg>
+            <span>
+              {wakeLockActive
+                ? '화면 켜짐 잠금 활성 — GPS 추적 안정'
+                : '추적 중 브라우저를 백그라운드로 이동하면 GPS 수신이 중단될 수 있습니다. 화면을 켜둔 채로 유지하세요.'}
+            </span>
           </div>
 
           {/* 포인트 부족 안내 */}
