@@ -2,8 +2,25 @@
 
 import { createDatabaseClient } from '@/lib/supabase/client'
 import { createAuthUser, getAuthUserByEmail } from '@/lib/auth/server'
+import { getCurrentUser } from '@/lib/auth/session'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+
+async function requireAdminOrStaff() {
+  const user = await getCurrentUser()
+  if (!user || (user.role !== 'admin' && user.role !== 'staff')) {
+    throw new Error('권한이 없습니다.')
+  }
+  return user
+}
+
+async function requireAdmin() {
+  const user = await getCurrentUser()
+  if (!user || user.role !== 'admin') {
+    throw new Error('관리자만 가능합니다.')
+  }
+  return user
+}
 
 export async function createCase(formData: FormData): Promise<{ error: string } | void> {
   const supabase = createDatabaseClient()
@@ -85,6 +102,7 @@ export async function createCase(formData: FormData): Promise<{ error: string } 
 }
 
 export async function updateCaseStatus(caseId: string, status: string) {
+  await requireAdminOrStaff()
   const supabase = createDatabaseClient()
 
   const { error } = await supabase
@@ -110,6 +128,7 @@ export async function updateCaseAssignedStaff(
   caseId: string,
   assignedStaffId: string | null
 ) {
+  await requireAdmin()
   const supabase = createDatabaseClient()
 
   const { error } = await supabase
@@ -135,6 +154,7 @@ export async function updateCaseFees(
   feeAmount: number | null,
   advancePayment: number | null
 ) {
+  await requireAdmin()
   const supabase = createDatabaseClient()
 
   const { error } = await supabase
@@ -164,6 +184,7 @@ export async function toggleReportShare(
   shouldShare: boolean
 ): Promise<{ error?: string }> {
   try {
+    await requireAdminOrStaff()
     const supabase = createDatabaseClient()
 
     // Verify report belongs to this case
