@@ -168,7 +168,7 @@ export function WorkSessionControl({ caseId, staffId, caseTitle }: Props) {
           onClick={requestStop}
           className="w-full min-h-[48px] bg-slate-800 border border-slate-700 hover:border-red-500/40 hover:text-red-400 text-slate-300 text-sm font-semibold rounded-xl transition-all cursor-pointer active:scale-[0.98]"
         >
-          업무 종료
+          추적 종료
         </button>
       </div>
     )
