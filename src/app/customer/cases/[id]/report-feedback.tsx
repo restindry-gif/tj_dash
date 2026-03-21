@@ -37,15 +37,16 @@ export function ReportFeedback({
   }
 
   return (
-    <div className="border-t border-slate-700/40 mt-3 pt-4 flex flex-col gap-4">
+    <div className="border-t border-slate-700/40 mt-3 pt-4 flex flex-col gap-3">
+
       {/* 확인 체크 */}
       <button
         onClick={handleCheck}
         disabled={checkPending}
-        className={`inline-flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-xl border transition-colors disabled:opacity-50 cursor-pointer ${
+        className={`inline-flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl border transition-all duration-200 disabled:opacity-50 cursor-pointer w-fit ${
           checked
-            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25'
-            : 'bg-slate-700/40 text-slate-300 border-slate-600/50 hover:bg-slate-700/70'
+            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50 hover:bg-emerald-500/30 hover:border-emerald-400/70'
+            : 'bg-slate-700 text-slate-100 border-slate-500 hover:bg-slate-600 hover:border-slate-400 hover:text-white'
         }`}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -54,7 +55,7 @@ export function ReportFeedback({
             : <><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></>
           }
         </svg>
-        {checked ? '확인함' : '확인'}
+        {checked ? '✓ 확인함' : '보고서 확인'}
       </button>
 
       {/* 코멘트 */}
@@ -63,21 +64,21 @@ export function ReportFeedback({
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="코멘트를 입력하세요..."
+            placeholder="담당자에게 전달할 내용을 입력하세요..."
             rows={4}
-            className="w-full bg-slate-900/60 border border-slate-600/50 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 resize-none focus:outline-none focus:border-slate-500 leading-relaxed"
+            className="w-full bg-slate-900/80 border border-slate-500/60 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 resize-none focus:outline-none focus:border-blue-500/70 focus:ring-1 focus:ring-blue-500/30 leading-relaxed transition-all"
           />
           <div className="flex gap-2">
             <button
               onClick={handleCommentSubmit}
               disabled={commentPending}
-              className="text-sm bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
+              className="text-sm font-semibold bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-4 py-2 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
             >
               {commentPending ? '저장 중...' : '저장'}
             </button>
             <button
               onClick={() => { setComment(initialComment ?? ''); setEditing(false) }}
-              className="text-sm text-slate-400 hover:text-slate-300 px-4 py-2 rounded-xl transition-colors cursor-pointer"
+              className="text-sm text-slate-400 hover:text-slate-200 px-4 py-2 rounded-xl border border-slate-700 hover:border-slate-600 transition-colors cursor-pointer"
             >
               취소
             </button>
@@ -85,26 +86,26 @@ export function ReportFeedback({
         </div>
       ) : comment ? (
         <div
-          className="flex items-start gap-3 bg-slate-900/50 border border-slate-700/40 rounded-xl px-4 py-3 cursor-pointer hover:border-slate-600/60 transition-colors"
+          className="flex items-start gap-3 bg-slate-800/80 border border-slate-600/60 rounded-xl px-4 py-3 cursor-pointer hover:border-slate-500 hover:bg-slate-800 transition-all duration-200 group"
           onClick={() => setEditing(true)}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500 mt-0.5 shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 mt-0.5 shrink-0">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
-          <p className="text-sm text-slate-300 leading-relaxed flex-1 whitespace-pre-wrap">{comment}</p>
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 shrink-0 mt-0.5">
+          <p className="text-sm text-slate-200 leading-relaxed flex-1 whitespace-pre-wrap">{comment}</p>
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-500 group-hover:text-slate-300 shrink-0 mt-0.5 transition-colors">
             <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
           </svg>
         </div>
       ) : (
         <button
           onClick={() => setEditing(true)}
-          className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-300 transition-colors cursor-pointer py-1"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-200 bg-slate-700 hover:bg-slate-600 border border-slate-500 hover:border-slate-400 hover:text-white px-4 py-2.5 rounded-xl transition-all duration-200 cursor-pointer w-fit"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
-          코멘트 추가
+          코멘트 남기기
         </button>
       )}
     </div>
