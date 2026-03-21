@@ -16,13 +16,20 @@ export async function requestOriginalPhoto(
   // 본인 사건의 보고인지 확인
   const { data: report } = await supabase
     .from('case_reports')
-    .select('id, case_id, cases!inner(client_id)')
+    .select('id, case_id')
     .eq('id', reportId)
     .single()
 
   if (!report) return { error: '보고를 찾을 수 없습니다.' }
-  // @ts-expect-error Supabase join type
-  if (report.cases.client_id !== user.id) return { error: '권한이 없습니다.' }
+
+  const { data: caseData } = await supabase
+    .from('cases')
+    .select('id')
+    .eq('id', report.case_id)
+    .eq('client_id', user.id)
+    .single()
+
+  if (!caseData) return { error: '권한이 없습니다.' }
 
   const { error } = await supabase
     .from('case_reports')
@@ -36,15 +43,22 @@ export async function requestOriginalPhoto(
 
 async function verifyReportOwnership(reportId: string, userId: string) {
   const supabase = createDatabaseClient()
-  const { data } = await supabase
+  // step 1: report → case_id
+  const { data: report } = await supabase
     .from('case_reports')
-    .select('id, cases!inner(client_id)')
+    .select('id, case_id')
     .eq('id', reportId)
     .single()
-  if (!data) return null
-  // @ts-expect-error Supabase join type
-  if (data.cases.client_id !== userId) return null
-  return data
+  if (!report) return null
+  // step 2: case must belong to user
+  const { data: caseData } = await supabase
+    .from('cases')
+    .select('id')
+    .eq('id', report.case_id)
+    .eq('client_id', userId)
+    .single()
+  if (!caseData) return null
+  return report
 }
 
 export async function toggleReportCheck(
