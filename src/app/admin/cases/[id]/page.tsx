@@ -2,6 +2,7 @@ import { createDatabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { CaseStatusForm } from './status-form'
 import { AssignStaffForm } from './assign-staff-form'
+import { CaseInfoForm } from './case-info-form'
 import { ReportsPanel } from './reports-panel'
 import { formatDateTime } from '@/lib/date'
 
@@ -79,10 +80,12 @@ export default async function CaseDetailPage({
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-5">
         <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">사건 정보</p>
 
-        <div className="space-y-1">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">사건명</p>
-          <p className="text-slate-300">{caseData.title || '-'}</p>
-        </div>
+        <CaseInfoForm
+          caseId={caseData.id}
+          title={caseData.title || ''}
+          consultationNotes={caseData.consultation_notes}
+          description={caseData.description}
+        />
 
         <div className="space-y-1">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">담당 직원</p>
@@ -92,20 +95,6 @@ export default async function CaseDetailPage({
             staffList={staffList || []}
             currentStaffName={staffName}
           />
-        </div>
-
-        <div className="space-y-1">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">상담 내용</p>
-          <div className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 min-h-24 whitespace-pre-wrap text-slate-300 text-sm">
-            {caseData.consultation_notes || '(없음)'}
-          </div>
-        </div>
-
-        <div className="space-y-1">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">사건 개요</p>
-          <div className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 min-h-24 whitespace-pre-wrap text-slate-300 text-sm">
-            {caseData.description || '(없음)'}
-          </div>
         </div>
 
         <div className="space-y-1">

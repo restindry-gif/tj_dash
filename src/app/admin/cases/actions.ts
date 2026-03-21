@@ -143,6 +143,32 @@ export async function updateCaseAssignedStaff(
 }
 
 /**
+ * Update case basic info (title, consultation_notes, description)
+ */
+export async function updateCaseInfo(
+  caseId: string,
+  data: { title: string; consultationNotes: string; description: string }
+) {
+  await requireAdminOrStaff()
+  const supabase = createDatabaseClient()
+
+  const { error } = await supabase
+    .from('cases')
+    .update({
+      title: data.title,
+      consultation_notes: data.consultationNotes,
+      description: data.description,
+    })
+    .eq('id', caseId)
+
+  if (error) throw new Error(`사건 정보 변경 실패: ${error.message}`)
+
+  revalidatePath('/admin')
+  revalidatePath(`/admin/cases/${caseId}`)
+  return { success: true }
+}
+
+/**
  * Toggle report sharing status with customer
  */
 export async function toggleReportShare(
