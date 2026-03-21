@@ -7,12 +7,18 @@ export const revalidate = 30
 export default async function AdminPage() {
   const supabase = createDatabaseClient()
 
-  // Fetch cases
-  const { data: cases, error } = await supabase
-    .from('cases')
-    .select('*')
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
+  // Fetch cases + consultations in parallel
+  const [{ data: cases, error }, { data: consultations }] = await Promise.all([
+    supabase
+      .from('cases')
+      .select('*')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('consultations')
+      .select('id, customer_name, customer_phone, status, consultation_date, created_at')
+      .order('created_at', { ascending: false }),
+  ])
 
   if (error) {
     console.error('Error fetching cases:', error)
@@ -23,11 +29,18 @@ export default async function AdminPage() {
     )
   }
 
-  // Calculate stats
+  // Case stats
   const totalCases = cases?.length || 0
   const activeCases = cases?.filter((c) => c.status === 'active').length || 0
   const pendingCases = cases?.filter((c) => c.status === 'pending').length || 0
   const completedCases = cases?.filter((c) => c.status === 'completed').length || 0
+
+  // Consultation stats
+  const totalConsultations = consultations?.length || 0
+  const pendingConsultations = consultations?.filter((c) => c.status === 'pending').length || 0
+  const inProgressConsultations = consultations?.filter((c) => c.status === 'in_progress').length || 0
+  const convertedConsultations = consultations?.filter((c) => c.status === 'converted').length || 0
+  const recentConsultations = consultations?.slice(0, 5) || []
 
   return (
     <div className="min-h-screen bg-slate-950 p-6 space-y-8">
@@ -101,6 +114,71 @@ export default async function AdminPage() {
             </svg>
           }
         />
+      </div>
+
+      {/* Consultation Stats */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-slate-50">상담 현황</h2>
+          <Link href="/admin/consultations" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
+            전체 보기 →
+          </Link>
+        </div>
+
+        {/* Consultation KPI */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { label: '전체 상담', value: totalConsultations, color: 'text-slate-200', bg: 'bg-slate-800/60' },
+            { label: '대기 중', value: pendingConsultations, color: 'text-yellow-400', bg: 'bg-yellow-500/5' },
+            { label: '진행 중', value: inProgressConsultations, color: 'text-blue-400', bg: 'bg-blue-500/5' },
+            { label: '사건 전환', value: convertedConsultations, color: 'text-purple-400', bg: 'bg-purple-500/5' },
+          ].map(({ label, value, color, bg }) => (
+            <div key={label} className={`${bg} border border-slate-800 rounded-xl p-4`}>
+              <p className={`text-2xl font-bold tabular-nums ${color}`}>{value}</p>
+              <p className="text-xs text-slate-500 mt-1">{label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Recent Consultations */}
+        <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-800 px-5 py-3.5">
+            <h3 className="text-sm font-semibold text-slate-300">최근 상담</h3>
+            <Link
+              href="/admin/consultations/new"
+              className="text-xs text-green-400 hover:text-green-300 transition-colors"
+            >
+              + 신규 상담
+            </Link>
+          </div>
+          {recentConsultations.length === 0 ? (
+            <p className="text-center text-slate-500 text-sm py-8">등록된 상담이 없습니다.</p>
+          ) : (
+            <div className="divide-y divide-slate-800">
+              {recentConsultations.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/admin/consultations/${c.id}`}
+                  className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-800/50 transition-colors group cursor-pointer"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-200 group-hover:text-white truncate">
+                      {c.customer_name}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {formatDate(c.consultation_date ?? c.created_at, { month: 'short', day: 'numeric' })}
+                      {c.customer_phone && <span className="ml-2">{c.customer_phone}</span>}
+                    </p>
+                  </div>
+                  <ConsultationStatusBadge status={c.status} />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 group-hover:text-slate-400 transition-colors shrink-0">
+                    <path d="m9 18 6-6-6-6"/>
+                  </svg>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Cases Table */}
@@ -199,6 +277,26 @@ function StatsCard({
       <div className={`text-3xl font-bold tabular-nums ${valueColors[type]}`}>{value}</div>
       <p className="mt-1 text-sm text-slate-400">{title}</p>
     </div>
+  )
+}
+
+function ConsultationStatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    pending:     'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20',
+    in_progress: 'bg-blue-400/10 text-blue-400 border border-blue-400/20',
+    completed:   'bg-green-400/10 text-green-400 border border-green-400/20',
+    converted:   'bg-purple-400/10 text-purple-400 border border-purple-400/20',
+  }
+  const labels: Record<string, string> = {
+    pending:     '대기 중',
+    in_progress: '진행 중',
+    completed:   '완료됨',
+    converted:   '사건 전환',
+  }
+  return (
+    <span className={`shrink-0 text-xs rounded-full px-2.5 py-0.5 font-medium ${styles[status] || 'bg-slate-700 text-slate-300 border border-slate-600'}`}>
+      {labels[status] || status}
+    </span>
   )
 }
 
