@@ -187,7 +187,7 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
 
         {/* 필터 모달 */}
         {isFilterOpen && (
-          <div className="border-t border-slate-800 pt-4 space-y-4 max-h-96 overflow-y-auto md:max-h-none md:overflow-y-visible">
+          <div className="border-t border-slate-800 pt-4 space-y-4 max-h-96 overflow-y-auto md:max-h-none md:overflow-y-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">
