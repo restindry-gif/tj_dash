@@ -109,34 +109,55 @@ export function ReportCard({
         : 'bg-slate-900/60 border border-slate-700/30'
     }`}>
       {/* 헤더 */}
-      <div className={`px-4 pt-2.5 pb-2 border-b ${isShared ? 'border-slate-600/50' : 'border-slate-700/30'}`}>
-        {/* 1줄: 타입 + 공유뱃지 | 아이콘 버튼들 + 시간 */}
+      <div className={`px-4 pt-2.5 pb-2 border-b space-y-1.5 ${isShared ? 'border-slate-600/50' : 'border-slate-700/30'}`}>
+
+        {/* 1줄: 타입 | 시간 + 삭제 */}
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center gap-1.5">
             <span className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${cfg.iconBg}`}>
               {cfg.icon}
             </span>
-            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${cfg.badge}`}>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}>
               {cfg.label}
             </span>
-            {isShared ? (
-              <span className="flex items-center gap-1 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
-                <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <time className="text-[11px] text-slate-500 tabular-nums">
+              {formatDateTime(report.created_at, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+            </time>
+            {isAdmin && !confirmDelete && (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                title="보고카드 삭제"
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
                 </svg>
-                공유 중
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-[10px] bg-slate-700/50 text-slate-500 border border-slate-600/30 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
-                <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="11" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
-                비공개
-              </span>
+              </button>
             )}
           </div>
-          {/* 우: 아이콘 전용 버튼들 + 시간 */}
+        </div>
+
+        {/* 2줄: 공유 상태 | 공유 토글 + 링크 */}
+        <div className="flex items-center justify-between gap-2">
+          {isShared ? (
+            <span className="flex items-center gap-1 text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full px-2 py-0.5 font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              고객 공유 중
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-[10px] bg-slate-700/50 text-slate-500 border border-slate-600/30 rounded-full px-2 py-0.5 font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="11" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              비공개
+            </span>
+          )}
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={handleToggleShare}
@@ -156,26 +177,12 @@ export function ReportCard({
               </svg>
             </button>
             <CopyLinkButton path={`/reports/${report.id}`} />
-            <time className="text-[11px] text-slate-500 tabular-nums">
-              {formatDateTime(report.created_at, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-            </time>
-            {isAdmin && !confirmDelete && (
-              <button
-                onClick={() => setConfirmDelete(true)}
-                title="보고카드 삭제"
-                className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                </svg>
-              </button>
-            )}
           </div>
         </div>
-        {/* 2줄: 보고자 */}
+
+        {/* 3줄: 보고자 (있을 때만) */}
         {report.profiles?.full_name && (
-          <div className="flex items-center gap-1.5 mt-1.5">
+          <div className="flex items-center gap-1.5">
             <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 shrink-0">
               <circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/>
             </svg>
