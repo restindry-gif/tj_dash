@@ -9,7 +9,7 @@ interface CaseItem {
   status: 'pending' | 'active' | 'completed' | 'cancelled'
   created_at: string
   is_starred: boolean
-  profiles?: { full_name: string } | null
+  assigned_staff_id: string | null
 }
 
 interface CaseFilterClientProps {
@@ -295,7 +295,11 @@ export function CaseFilterClient({ initialCases, staffList }: CaseFilterClientPr
                     {caseItem.title}
                   </p>
                   <div className="flex items-center gap-2 mt-1 text-xs text-slate-400">
-                    <span>{caseItem.profiles?.full_name || '미배정'}</span>
+                    <span>
+                      {caseItem.assigned_staff_id
+                        ? staffList.find((s) => s.id === caseItem.assigned_staff_id)?.full_name || '미배정'
+                        : '미배정'}
+                    </span>
                     <span>|</span>
                     <span>{new Date(caseItem.created_at).toLocaleDateString('ko-KR')}</span>
                   </div>
