@@ -10,7 +10,10 @@ interface SidebarClientProps {
   userRole?: string | null
 }
 
-const navItems = [
+interface NavItem { href: string; label: string; icon: React.ReactNode; exact?: boolean; adminOnly?: boolean }
+interface NavSection { section: string; items: NavItem[] }
+
+const navItems: NavItem[] = [
   {
     href: '/admin',
     exact: true,
@@ -24,7 +27,7 @@ const navItems = [
   },
 ]
 
-const sectionItems = [
+const sectionItems: NavSection[] = [
   {
     section: '사건 관리',
     items: [
@@ -80,6 +83,7 @@ const sectionItems = [
       {
         href: '/admin/customers',
         label: '고객 관리',
+        adminOnly: false,
         icon: (
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -90,10 +94,22 @@ const sectionItems = [
       {
         href: '/admin/staff',
         label: '직원 관리',
+        adminOnly: false,
         icon: (
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
             <circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+        ),
+      },
+      {
+        href: '/admin/trash',
+        label: '휴지통',
+        adminOnly: true,
+        icon: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
           </svg>
         ),
       },
@@ -180,16 +196,22 @@ export function SidebarClient({ userEmail, userRole }: SidebarClientProps) {
           {navItems.map((item) => (
             <NavLink key={item.href} {...item} />
           ))}
-          {sectionItems.map((section) => (
-            <div key={section.section}>
-              <div className="pt-4 pb-1 px-3">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{section.section}</p>
+          {sectionItems.map((section) => {
+            const visibleItems = section.items.filter(
+              (item) => !item.adminOnly || userRole === 'admin'
+            )
+            if (visibleItems.length === 0) return null
+            return (
+              <div key={section.section}>
+                <div className="pt-4 pb-1 px-3">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{section.section}</p>
+                </div>
+                {visibleItems.map((item) => (
+                  <NavLink key={item.href} {...item} />
+                ))}
               </div>
-              {section.items.map((item) => (
-                <NavLink key={item.href} {...item} />
-              ))}
-            </div>
-          ))}
+            )
+          })}
         </nav>
 
         <div className="shrink-0 border-t border-slate-800 p-4">

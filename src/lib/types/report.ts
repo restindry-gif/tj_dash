@@ -17,4 +17,6 @@ export interface Report {
   total_points: number | null
   distance_km: number | null
   profiles: { full_name: string } | null
+  deleted_at: string | null
+  deleted_by: string | null
 }

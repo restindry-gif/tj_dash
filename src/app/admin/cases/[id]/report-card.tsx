@@ -4,7 +4,7 @@ import { useTransition, useState } from 'react'
 import { CopyLinkButton } from '@/components/copy-link-button'
 import { RouteMapDynamic } from '@/components/route-map-wrapper'
 import { formatDateTime } from '@/lib/date'
-import { toggleReportShare } from '../actions'
+import { toggleReportShare, deleteReport } from '../actions'
 import type { Report } from '@/lib/types/report'
 
 const TYPE_CONFIG: Record<string, {
@@ -55,13 +55,18 @@ export function ReportCard({
   report,
   caseId,
   routePts,
+  isAdmin = false,
 }: {
   report: Report
   caseId: string
   routePts?: [number, number][]
+  isAdmin?: boolean
 }) {
   const [isPending, startTransition] = useTransition()
   const [isShared, setIsShared] = useState(report.is_shared_with_customer)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deletePending, setDeletePending] = useState(false)
+  const [deleted, setDeleted] = useState(false)
 
   const handleToggleShare = () => {
     const newState = !isShared
@@ -71,6 +76,19 @@ export function ReportCard({
       if (result?.error) setIsShared(!newState)
     })
   }
+
+  const handleDelete = async () => {
+    setDeletePending(true)
+    const result = await deleteReport(report.id, caseId)
+    if (result.error) {
+      setDeletePending(false)
+      setConfirmDelete(false)
+    } else {
+      setDeleted(true)
+    }
+  }
+
+  if (deleted) return null
 
   const cfg = TYPE_CONFIG[report.report_type] ?? TYPE_CONFIG.text
   const memo = report.report_type === 'route' && report.content
@@ -141,8 +159,46 @@ export function ReportCard({
           <time className="text-xs text-slate-500 tabular-nums">
             {formatDateTime(report.created_at, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </time>
+          {/* 관리자 삭제 버튼 */}
+          {isAdmin && !confirmDelete && (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              title="보고카드 삭제"
+              className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              </svg>
+            </button>
+          )}
         </div>
       </div>
+
+      {/* 삭제 확인 바 */}
+      {confirmDelete && (
+        <div className="flex items-center justify-between px-4 py-2.5 bg-red-950/40 border-b border-red-500/30">
+          <p className="text-xs text-red-300">
+            휴지통으로 이동합니다. <span className="text-red-400 font-semibold">3일 후 영구 삭제</span>됩니다.
+          </p>
+          <div className="flex items-center gap-2 shrink-0 ml-3">
+            <button
+              onClick={() => setConfirmDelete(false)}
+              disabled={deletePending}
+              className="text-xs text-slate-400 hover:text-slate-200 px-3 py-1 rounded-lg transition-colors cursor-pointer"
+            >
+              취소
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deletePending}
+              className="text-xs bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {deletePending ? '삭제 중...' : '삭제 확인'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 상태 뱃지 행 (LIVE / 원본요청 / 의뢰인확인) */}
       {hasBadges && (

@@ -199,3 +199,99 @@ export async function toggleReportShare(
     return { error: 'An error occurred' }
   }
 }
+
+/**
+ * 보고카드 소프트 삭제 (휴지통으로 이동)
+ */
+export async function deleteReport(
+  reportId: string,
+  caseId: string
+): Promise<{ error?: string }> {
+  try {
+    const { getCurrentUser } = await import('@/lib/auth/session')
+    const user = await getCurrentUser()
+    if (!user || user.role !== 'admin') return { error: '관리자만 삭제할 수 있습니다.' }
+
+    const supabase = createDatabaseClient()
+    const { error } = await supabase
+      .from('case_reports')
+      .update({ deleted_at: new Date().toISOString(), deleted_by: user.id })
+      .eq('id', reportId)
+      .eq('case_id', caseId)
+
+    if (error) return { error: error.message }
+
+    revalidatePath(`/admin/cases/${caseId}`)
+    revalidatePath('/admin/trash')
+    return {}
+  } catch (err) {
+    return { error: (err as Error).message }
+  }
+}
+
+/**
+ * 휴지통에서 복구
+ */
+export async function restoreReport(
+  reportId: string,
+  caseId: string
+): Promise<{ error?: string }> {
+  try {
+    const { getCurrentUser } = await import('@/lib/auth/session')
+    const user = await getCurrentUser()
+    if (!user || user.role !== 'admin') return { error: '관리자만 복구할 수 있습니다.' }
+
+    const supabase = createDatabaseClient()
+    const { error } = await supabase
+      .from('case_reports')
+      .update({ deleted_at: null, deleted_by: null })
+      .eq('id', reportId)
+
+    if (error) return { error: error.message }
+
+    revalidatePath(`/admin/cases/${caseId}`)
+    revalidatePath('/admin/trash')
+    return {}
+  } catch (err) {
+    return { error: (err as Error).message }
+  }
+}
+
+/**
+ * 영구 삭제
+ */
+export async function permanentDeleteReport(
+  reportId: string
+): Promise<{ error?: string }> {
+  try {
+    const { getCurrentUser } = await import('@/lib/auth/session')
+    const user = await getCurrentUser()
+    if (!user || user.role !== 'admin') return { error: '관리자만 영구 삭제할 수 있습니다.' }
+
+    const supabase = createDatabaseClient()
+    const { error } = await supabase
+      .from('case_reports')
+      .delete()
+      .eq('id', reportId)
+
+    if (error) return { error: error.message }
+
+    revalidatePath('/admin/trash')
+    return {}
+  } catch (err) {
+    return { error: (err as Error).message }
+  }
+}
+
+/**
+ * 3일 지난 항목 자동 영구 삭제
+ */
+export async function purgeExpiredReports(): Promise<void> {
+  const supabase = createDatabaseClient()
+  const cutoff = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+  await supabase
+    .from('case_reports')
+    .delete()
+    .not('deleted_at', 'is', null)
+    .lt('deleted_at', cutoff)
+}

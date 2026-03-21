@@ -47,7 +47,15 @@
       "Bash(git diff:*)",
       "Bash(python skills/ui-ux-pro-max/scripts/search.py \"dark dashboard action buttons interactive CTA visibility\" --domain ux -n 5)",
       "Bash(python scripts/search.py \"dark dashboard action buttons interactive CTA visibility\" --domain ux -n 5)",
-      "Bash(python scripts/search.py \"dark dashboard interactive action button CTA visibility contrast\" --domain ux -n 5)"
+      "Bash(python scripts/search.py \"dark dashboard interactive action button CTA visibility contrast\" --domain ux -n 5)",
+      "Bash(claude plugin:*)",
+      "Bash(find C:Usersoffic.claudepluginscache -type d -name *superpowers*)",
+      "Bash(grep -n \"handleToggleShare\\\\|공유\\\\|is_shared_with_customer\" /c/tj_dash/src/app/admin/cases/[id]/reports-panel.tsx)",
+      "Bash(grep -n \"is_shared_with_customer\" /c/tj_dash/src/app/customer/cases/[id]/page.tsx)",
+      "Bash(npx tsc:*)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -n \"select\\\\|client_checked\\\\|client_comment\\\\|original_requested\" C:/tj_dash/src/app/admin/cases/[id]/reports-panel.tsx)",
+      "Bash(grep -n \"report\\\\|Report\\\\|shared\\\\|card\\\\|Card\" C:/tj_dash/src/app/customer/cases/[id]/page.tsx)"
     ]
   }
 }

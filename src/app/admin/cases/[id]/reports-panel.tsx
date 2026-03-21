@@ -1,4 +1,5 @@
 import { createDatabaseClient } from '@/lib/supabase/client'
+import { getCurrentUser } from '@/lib/auth/session'
 import { ReportCard } from './report-card'
 import type { Report } from '@/lib/types/report'
 
@@ -16,11 +17,14 @@ async function getRoutePoints(sessionId: string): Promise<[number, number][]> {
 
 export async function ReportsPanel({ caseId }: { caseId: string }) {
   const supabase = createDatabaseClient()
+  const user = await getCurrentUser()
+  const isAdmin = user?.role === 'admin'
 
   const { data: reports, error } = await supabase
     .from('case_reports')
     .select('*, profiles(full_name)')
     .eq('case_id', caseId)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -54,7 +58,7 @@ export async function ReportsPanel({ caseId }: { caseId: string }) {
         <div className="p-4 space-y-3">
           {(reports as Report[]).map((report) => {
             const routePts = report.session_id ? routePointsMap[report.session_id] : undefined
-            return <ReportCard key={report.id} report={report} caseId={caseId} routePts={routePts} />
+            return <ReportCard key={report.id} report={report} caseId={caseId} routePts={routePts} isAdmin={isAdmin} />
           })}
         </div>
       )}
