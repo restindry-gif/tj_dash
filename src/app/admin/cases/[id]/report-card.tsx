@@ -96,26 +96,21 @@ export function ReportCard({
   const memo = report.report_type === 'route' && report.content
     ? report.content.split('\n').slice(1).join('\n').trim()
     : null
+  const hasBadges = report.is_live || report.original_requested || report.client_checked
 
   return (
     <div className={`bg-slate-800/50 border border-slate-700/50 border-l-4 ${cfg.accent} rounded-xl overflow-hidden`}>
-      {/* 헤더 */}
+      {/* 헤더 1행: 타입 + 직원명 + 액션 */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/40">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <span className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${cfg.iconBg}`}>
             {cfg.icon}
           </span>
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.badge}`}>
+          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${cfg.badge}`}>
             {cfg.label}
           </span>
-          {report.is_live && (
-            <span className="flex items-center gap-1 text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 rounded-full px-2 py-0.5 font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-              LIVE
-            </span>
-          )}
           {report.profiles?.full_name && (
-            <span className="text-xs text-slate-400">{report.profiles.full_name}</span>
+            <span className="text-xs text-slate-400 truncate">{report.profiles.full_name}</span>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -156,6 +151,30 @@ export function ReportCard({
           </time>
         </div>
       </div>
+
+      {/* 헤더 2행: 상태 뱃지 (있을 때만) */}
+      {hasBadges && (
+        <div className="flex items-center gap-1.5 px-4 py-1.5 border-b border-slate-700/30 flex-wrap">
+          {report.is_live && (
+            <span className="flex items-center gap-1 text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />LIVE
+            </span>
+          )}
+          {report.original_requested && (
+            <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+              원본 요청됨
+            </span>
+          )}
+          {report.client_checked && (
+            <span className="flex items-center gap-1 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full px-2 py-0.5 font-semibold whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+              의뢰인 확인
+            </span>
+          )}
+        </div>
+      )}
 
       {/* 바디 */}
       <div className="px-4 py-3 space-y-3">
@@ -232,6 +251,19 @@ export function ReportCard({
           <div className="bg-slate-900/60 rounded-lg px-3 py-3 border border-slate-700/30 space-y-1.5">
             <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wide">음성 파일</p>
             <audio controls src={report.media_url} className="w-full h-10" />
+          </div>
+        )}
+
+        {/* 고객 코멘트 */}
+        {report.client_comment && (
+          <div className="flex items-start gap-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg px-3 py-2.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400 mt-0.5 shrink-0">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-emerald-500 font-semibold uppercase tracking-wide mb-1">의뢰인 코멘트</p>
+              <p className="text-sm text-emerald-300 leading-relaxed whitespace-pre-wrap">{report.client_comment}</p>
+            </div>
           </div>
         )}
       </div>
