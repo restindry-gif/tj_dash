@@ -9,10 +9,11 @@ const supabase = createClient(
 // GET - 특정 보고서 로드
 export async function GET(
   request: NextRequest,
-  { params }: { params: { name: string } }
+  { params }: { params: Promise<{ name: string }> }
 ) {
   try {
-    const name = decodeURIComponent(params.name)
+    const { name: encodedName } = await params
+    const name = decodeURIComponent(encodedName)
 
     const { data, error } = await supabase
       .from('call_reports')
@@ -32,10 +33,11 @@ export async function GET(
 // DELETE - 보고서 삭제
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { name: string } }
+  { params }: { params: Promise<{ name: string }> }
 ) {
   try {
-    const name = decodeURIComponent(params.name)
+    const { name: encodedName } = await params
+    const name = decodeURIComponent(encodedName)
 
     const { error } = await supabase.from('call_reports').delete().eq('name', name)
 
