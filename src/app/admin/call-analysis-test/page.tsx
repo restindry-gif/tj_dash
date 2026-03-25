@@ -353,7 +353,7 @@ export default function CallAnalysisTestPage() {
   return (
     <div className="min-h-screen bg-slate-900 p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-8 no-print">📞 통화 분석 테스트</h1>
+        <h1 className="text-3xl font-bold text-white mb-8 no-print">상담 분석 SYSTEM</h1>
 
         {/* 에러 표시 */}
         {error && (
