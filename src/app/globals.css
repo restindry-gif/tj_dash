@@ -1,5 +1,92 @@
 @import "tailwindcss";
 
+/* ===== PDF / PRINT STYLES ===== */
+@media print {
+  /* 인쇄 불필요 영역 숨김 */
+  .no-print { display: none !important; }
+
+  /* 인쇄 전용 요소 표시 */
+  .print-only { display: block !important; }
+
+  /* 페이지 설정 */
+  @page {
+    size: A4;
+    margin: 20mm 18mm 20mm 18mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 10pt;
+    line-height: 1.6;
+  }
+
+  /* 보고서 컨테이너 */
+  .print-report {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* 섹션 카드 */
+  .print-section {
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 4px !important;
+    padding: 12pt !important;
+    margin-bottom: 10pt !important;
+    page-break-inside: avoid;
+    color: #1a1a1a !important;
+  }
+
+  /* 섹션 제목 */
+  .print-section-title {
+    font-size: 10pt !important;
+    font-weight: 700 !important;
+    color: #374151 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding-bottom: 6pt !important;
+    margin-bottom: 8pt !important;
+  }
+
+  /* 본문 텍스트 */
+  .print-section p,
+  .print-section li,
+  .print-section span {
+    color: #1a1a1a !important;
+    font-size: 10pt !important;
+  }
+
+  /* 보조 텍스트 */
+  .print-detail {
+    color: #6b7280 !important;
+    font-size: 9pt !important;
+  }
+
+  /* 키워드 배지 */
+  .print-keyword {
+    display: inline-block;
+    border: 1px solid #9ca3af !important;
+    background: #f9fafb !important;
+    color: #374151 !important;
+    padding: 1pt 6pt !important;
+    border-radius: 3px !important;
+    font-size: 9pt !important;
+    margin: 2pt !important;
+  }
+
+  /* 액션 아이템 우선순위 */
+  .print-priority-high { color: #dc2626 !important; font-weight: 600; }
+  .print-priority-medium { color: #d97706 !important; font-weight: 600; }
+  .print-priority-low { color: #16a34a !important; font-weight: 600; }
+}
+
+/* 화면에서 print-only 숨김 */
+.print-only { display: none; }
+
 /* Sovereign Dossier — Design System */
 :root {
   --gold: #e9c176;
